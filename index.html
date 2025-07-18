@@ -1,0 +1,588 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2674.5">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="apple-mobile-web-app-capable" content="yes"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;AR Measurement Tool&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>* {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-tap-highlight-color: transparent;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #000;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: fixed;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#app {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100vw;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100vh;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#camera-feed {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>object-fit: cover;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #000;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#ar-overlay {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.measurement-point {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 40px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 40px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translate(-50%, -50%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: auto;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: move;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 10;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>touch-action: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.point-inner {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.9);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 3px solid #007AFF;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: transform 0.2s;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.measurement-point:active .point-inner {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(1.2);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.measurement-line {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #FFCC00;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 3px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform-origin: left center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.measurement-label {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(0, 0, 0, 0.8);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #FFCC00;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 8px 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>white-space: nowrap;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-backdrop-filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 204, 0, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#crosshair {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translate(-50%, -50%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 50px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 50px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 5;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#crosshair::before,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#crosshair::after {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>content: '';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.8);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#crosshair::before {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 2px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-50%);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#crosshair::after {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 2px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateX(-50%);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#controls {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>bottom: 30px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateX(-50%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 20;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.control-btn {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 70px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 70px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.9);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #000;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.control-btn:active {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(0.95);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.control-btn.add {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #007AFF;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.control-btn.clear {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #FF3B30;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#info-panel {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(0, 0, 0, 0.8);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-backdrop-filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 20;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#unit-toggle {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>right: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(0, 0, 0, 0.8);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #007AFF;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-backdrop-filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 20;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#permission-overlay {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(0, 0, 0, 0.95);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 100;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#permission-overlay h2 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#start-camera {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px 30px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #007AFF;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-appearance: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.error-message {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #FF3B30;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1.5;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-width: 400px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.instructions {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 204, 0, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #FFCC00;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-width: 400px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: left;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.instructions h3 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #FFCC00;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.instructions ol {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-left: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1.8;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.instructions code {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 2px 6px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: monospace;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="app"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;video id="camera-feed" autoplay playsinline muted&gt;&lt;/video&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;canvas id="ar-overlay"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="crosshair"&gt;&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="info-panel"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div&gt;Measurements: &lt;span id="measurement-count"&gt;0&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="unit-toggle"&gt;cm&lt;/button&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="controls"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="control-btn add" id="add-point"&gt;+&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="control-btn clear" id="clear-all"&gt;×&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="permission-overlay"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2&gt;AR Measurement Tool&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button id="start-camera"&gt;Enable Camera&lt;/button&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="instructions"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3&gt;⚠️ Camera Not Working Here?&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p&gt;The Claude.ai preview doesn't support camera access. To use this app:&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;ol&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;Click the &lt;strong&gt;Copy&lt;/strong&gt; button above the code&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;Save as &lt;code&gt;measure.html&lt;/code&gt; on your device&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;Open the file in Safari (iPhone) or Chrome (Android)&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;Allow camera permissions when prompted&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/ol&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p style="margin-top: 10px; font-size: 14px; opacity: 0.8;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>For best results on iPhone, add to Home Screen after opening in Safari.</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="error-message" id="error-message"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>class MeasurementApp {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>constructor() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.video = document.getElementById('camera-feed');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.canvas = document.getElementById('ar-overlay');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.ctx = this.canvas.getContext('2d');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.measurements = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.currentMeasurement = null;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.unit = 'cm';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.pixelsPerCm = 10;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Detect environment</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) &amp;&amp; !window.MSStream;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.isAndroid = /Android/.test(navigator.userAgent);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.isInIframe = window.self !== window.top;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.init();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>async init() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Show warning if in iframe (Claude preview)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (this.isInIframe) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>console.log('Running in iframe - camera access may be restricted');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('start-camera').addEventListener('click', () =&gt; this.startCamera());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('add-point').addEventListener('click', () =&gt; this.addPoint());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('clear-all').addEventListener('click', () =&gt; this.clearAll());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('unit-toggle').addEventListener('click', () =&gt; this.toggleUnit());</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>window.addEventListener('resize', () =&gt; this.resizeCanvas());</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Prevent default touch behaviors</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.addEventListener('touchmove', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (e.target.closest('.measurement-point')) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}, { passive: false });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>async startCamera() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>throw new Error('Camera API not supported');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Simple constraints that work across all devices</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const constraints = {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>audio: false,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>video: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>facingMode: 'environment',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>width: { ideal: 1920 },</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>height: { ideal: 1080 }</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Get camera stream</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const stream = await navigator.mediaDevices.getUserMedia(constraints);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Set up video element</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.video.srcObject = stream;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Ensure video plays</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>await this.video.play();</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Hide permission overlay once video is playing</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.video.addEventListener('playing', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>document.getElementById('permission-overlay').style.display = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>this.resizeCanvas();</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>this.animate();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}, { once: true });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>} catch (error) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>console.error('Camera error:', error);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let errorMessage = '';</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (this.isInIframe) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>errorMessage = 'Camera access is blocked in this preview. Please follow the instructions above to use the app.';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else if (error.name === 'NotAllowedError') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>errorMessage = 'Camera permission denied. Please allow camera access in your browser settings.';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else if (error.name === 'NotFoundError') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>errorMessage = 'No camera found on this device.';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>errorMessage = `Camera error: ${error.message}`;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('error-message').textContent = errorMessage;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>resizeCanvas() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.canvas.width = window.innerWidth;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.canvas.height = window.innerHeight;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>addPoint() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const centerX = window.innerWidth / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const centerY = window.innerHeight / 2;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!this.currentMeasurement) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.currentMeasurement = {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>start: { x: centerX, y: centerY },</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>end: null,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>id: Date.now()</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>};</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.createPointElement(centerX, centerY, 'start', this.currentMeasurement.id);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else if (!this.currentMeasurement.end) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.currentMeasurement.end = { x: centerX, y: centerY };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.createPointElement(centerX, centerY, 'end', this.currentMeasurement.id);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.measurements.push(this.currentMeasurement);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.createMeasurementLine(this.currentMeasurement);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.currentMeasurement = null;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.updateMeasurementCount();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>createPointElement(x, y, type, measurementId) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const point = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.className = 'measurement-point';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.dataset.type = type;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.dataset.measurementId = measurementId;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.style.left = x + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.style.top = y + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.innerHTML = '&lt;div class="point-inner"&gt;&lt;/div&gt;';</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Handle both touch and mouse events</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let isDragging = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let startX, startY;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const handleStart = (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>isDragging = true;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const touch = e.touches ? e.touches[0] : e;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>startX = touch.clientX - x;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>startY = touch.clientY - y;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const handleMove = (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!isDragging) return;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const touch = e.touches ? e.touches[0] : e;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const newX = touch.clientX - startX;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const newY = touch.clientY - startY;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>point.style.left = newX + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>point.style.top = newY + 'px';</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.updateMeasurement(measurementId, type, newX, newY);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const handleEnd = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>isDragging = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Touch events</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.addEventListener('touchstart', handleStart, { passive: false });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.addEventListener('touchmove', handleMove, { passive: false });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.addEventListener('touchend', handleEnd);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Mouse events as fallback</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.addEventListener('mousedown', handleStart);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.addEventListener('mousemove', handleMove);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.addEventListener('mouseup', handleEnd);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('app').appendChild(point);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>createMeasurementLine(measurement) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const line = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.className = 'measurement-line';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.dataset.measurementId = measurement.id;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const label = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>label.className = 'measurement-label';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>label.dataset.measurementId = measurement.id;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('app').appendChild(line);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('app').appendChild(label);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.updateLine(measurement);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateMeasurement(id, type, x, y) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const measurement = this.measurements.find(m =&gt; m.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (measurement) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>measurement[type] = { x, y };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.updateLine(measurement);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateLine(measurement) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const line = document.querySelector(`.measurement-line[data-measurement-id="${measurement.id}"]`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const label = document.querySelector(`.measurement-label[data-measurement-id="${measurement.id}"]`);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!line || !label) return;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const dx = measurement.end.x - measurement.start.x;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const dy = measurement.end.y - measurement.start.y;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const distance = Math.sqrt(dx * dx + dy * dy);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const angle = Math.atan2(dy, dx) * 180 / Math.PI;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.style.left = measurement.start.x + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.style.top = measurement.start.y + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.style.width = distance + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.style.transform = `rotate(${angle}deg)`;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const midX = (measurement.start.x + measurement.end.x) / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const midY = (measurement.start.y + measurement.end.y) / 2;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const measurementValue = this.calculateDistance(distance);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>label.textContent = measurementValue;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>label.style.left = midX + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>label.style.top = (midY - 30) + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>label.style.transform = 'translate(-50%, -50%)';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>calculateDistance(pixels) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const value = pixels / this.pixelsPerCm;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (this.unit === 'cm') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return value.toFixed(1) + ' cm';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else if (this.unit === 'm') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return (value / 100).toFixed(2) + ' m';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return (value / 2.54).toFixed(1) + ' in';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>toggleUnit() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const units = ['cm', 'm', 'in'];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const currentIndex = units.indexOf(this.unit);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.unit = units[(currentIndex + 1) % units.length];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('unit-toggle').textContent = this.unit;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.measurements.forEach(m =&gt; this.updateLine(m));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>clearAll() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.measurements = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.currentMeasurement = null;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.querySelectorAll('.measurement-point, .measurement-line, .measurement-label').forEach(el =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>el.remove();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>this.updateMeasurementCount();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateMeasurementCount() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('measurement-count').textContent = this.measurements.length;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>animate() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>requestAnimationFrame(() =&gt; this.animate());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Initialize the app</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const app = new MeasurementApp();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
