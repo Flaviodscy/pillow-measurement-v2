@@ -274,8 +274,9 @@
         #camera-feed {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
+            object-fit: contain; /* Changed from cover to contain for better view */
+            transform: scaleX(-1) scale(0.8); /* Zoom out to 80% */
+            background: #000;
         }
 
         /* Distance indicator circle */
@@ -284,8 +285,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 400px;
-            height: 400px;
+            width: 350px; /* Reduced from 400px */
+            height: 350px; /* Reduced from 400px */
             pointer-events: none;
             z-index: 4;
         }
@@ -390,8 +391,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 500px;
-            height: 500px;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
         }
 
@@ -401,17 +402,18 @@
             height: 2px;
             background: rgba(255, 255, 255, 0.4);
             left: 50%;
-            transform-origin: left center;
+            top: 50%;
+            transform-origin: center;
         }
 
-        .distance-mark:nth-child(1) { transform: translateX(-50%) rotate(0deg) translateX(250px); }
-        .distance-mark:nth-child(2) { transform: translateX(-50%) rotate(45deg) translateX(250px); }
-        .distance-mark:nth-child(3) { transform: translateX(-50%) rotate(90deg) translateX(250px); }
-        .distance-mark:nth-child(4) { transform: translateX(-50%) rotate(135deg) translateX(250px); }
-        .distance-mark:nth-child(5) { transform: translateX(-50%) rotate(180deg) translateX(250px); }
-        .distance-mark:nth-child(6) { transform: translateX(-50%) rotate(225deg) translateX(250px); }
-        .distance-mark:nth-child(7) { transform: translateX(-50%) rotate(270deg) translateX(250px); }
-        .distance-mark:nth-child(8) { transform: translateX(-50%) rotate(315deg) translateX(250px); }
+        .distance-mark:nth-child(1) { transform: translate(-50%, -50%) translateX(175px); }
+        .distance-mark:nth-child(2) { transform: translate(-50%, -50%) rotate(45deg) translateX(175px); }
+        .distance-mark:nth-child(3) { transform: translate(-50%, -50%) rotate(90deg) translateX(175px); }
+        .distance-mark:nth-child(4) { transform: translate(-50%, -50%) rotate(135deg) translateX(175px); }
+        .distance-mark:nth-child(5) { transform: translate(-50%, -50%) rotate(180deg) translateX(175px); }
+        .distance-mark:nth-child(6) { transform: translate(-50%, -50%) rotate(225deg) translateX(175px); }
+        .distance-mark:nth-child(7) { transform: translate(-50%, -50%) rotate(270deg) translateX(175px); }
+        .distance-mark:nth-child(8) { transform: translate(-50%, -50%) rotate(315deg) translateX(175px); }
 
         /* Face guide with distance integration */
         .face-guide {
@@ -419,8 +421,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 300px;
-            height: 400px;
+            width: 250px; /* Reduced from 300px */
+            height: 330px; /* Reduced from 400px */
             pointer-events: none;
             z-index: 5;
         }
@@ -449,14 +451,14 @@
         .face-outline::before {
             content: 'PLACE YOUR FACE HERE';
             position: absolute;
-            bottom: -40px;
+            bottom: -35px; /* Adjusted from -40px */
             left: 50%;
             transform: translateX(-50%);
             color: white;
-            font-size: 18px;
+            font-size: 16px; /* Reduced from 18px */
             font-weight: 600;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            letter-spacing: 2px;
+            letter-spacing: 1px; /* Reduced from 2px */
             white-space: nowrap;
         }
 
@@ -468,7 +470,7 @@
         /* Distance indicator info box */
         .distance-info {
             position: absolute;
-            bottom: 120px;
+            bottom: 140px; /* Increased from 120px to avoid overlap */
             left: 50%;
             transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.95);
@@ -635,6 +637,7 @@
             text-align: center;
             z-index: 10;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 80%; /* Prevent overlap with close button */
         }
 
         .camera-header h3 {
@@ -708,11 +711,17 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 25; /* High z-index */
         }
 
-        .close-camera:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .camera-view-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
         /* Measurement points */
@@ -722,7 +731,9 @@
             height: 48px;
             transform: translate(-50%, -50%);
             cursor: move;
-            z-index: 10;
+            z-index: 15; /* Increased z-index */
+            pointer-events: auto !important; /* Force pointer events */
+            touch-action: none; /* Better touch support */
         }
 
         .point-inner {
@@ -760,6 +771,8 @@
             height: 3px;
             transform-origin: left center;
             box-shadow: 0 2px 4px rgba(251, 191, 36, 0.4);
+            z-index: 14; /* Added z-index */
+            pointer-events: none;
         }
 
         /* Measurement label */
@@ -774,6 +787,8 @@
             transform: translate(-50%, -50%);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border: 2px solid #fbbf24;
+            z-index: 20; /* Increased z-index */
+            pointer-events: none;
         }
 
         /* Success toast */
@@ -849,7 +864,7 @@
             gap: 16px;
         }
 
-        /* Mobile */
+        /* Mobile optimization */
         @media (max-width: 600px) {
             .container {
                 padding: 32px 24px;
@@ -866,8 +881,17 @@
             }
 
             .face-guide {
-                width: 240px;
-                height: 320px;
+                width: 200px;
+                height: 260px;
+            }
+            
+            .distance-indicator {
+                width: 280px;
+                height: 280px;
+            }
+            
+            #camera-feed {
+                transform: scaleX(-1) scale(0.7); /* More zoom out on mobile */
             }
         }
     </style>
@@ -880,17 +904,19 @@
         <div class="progress-bar">
             <div class="progress-fill" id="progressBar" style="width: 0%"></div>
         </div>
+        
+        <button class="close-camera" onclick="closeCameraMeasurement()">×</button>
 
         <div id="measurementSection" class="measurement-section" style="display: none;">
             <h3>📏 Body Measurements</h3>
             <p style="color: #6b7280; margin-bottom: 24px;">Customize your recommendations with precise measurements</p>
             
             <div class="measurement-toggle">
-                <button class="toggle-btn active" onclick="toggleMeasurementMethod('manual')">✏️ Manual</button>
-                <button class="toggle-btn" onclick="toggleMeasurementMethod('camera')">📸 Camera</button>
+                <button class="toggle-btn" onclick="toggleMeasurementMethod('manual')">✏️ Manual</button>
+                <button class="toggle-btn active" onclick="toggleMeasurementMethod('camera')">📸 Camera</button>
             </div>
 
-            <div id="manualInput">
+            <div id="manualInput" style="display: none;">
                 <div class="measurement-input-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0;">
                     <div class="measurement-input-item">
                         <div style="color: #4b5563; font-weight: 600; margin-bottom: 8px;">Neck Width</div>
@@ -911,10 +937,27 @@
                 <button class="btn btn-primary" onclick="saveManualMeasurements()">Save Measurements</button>
             </div>
 
-            <div id="cameraButton" style="display: none;">
+            <div id="cameraButton">
                 <button class="btn btn-primary" onclick="startCameraMeasurement()" style="margin-top: 20px;">
                     📸 Start Camera Measurement
                 </button>
+                <div id="currentMeasurements" style="margin-top: 20px; padding: 20px; background: #f9fafb; border-radius: 12px; display: none;">
+                    <h4 style="color: #1f2937; margin-bottom: 12px;">Current Measurements:</h4>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
+                        <div>
+                            <div style="font-size: 24px; font-weight: 700; color: #3b82f6;"><span id="displayNeck">-</span></div>
+                            <div style="color: #6b7280; font-size: 14px;">Neck (cm)</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 24px; font-weight: 700; color: #8b5cf6;"><span id="displayShoulders">-</span></div>
+                            <div style="color: #6b7280; font-size: 14px;">Shoulders (cm)</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 24px; font-weight: 700; color: #ec4899;"><span id="displayLength">-</span></div>
+                            <div style="color: #6b7280; font-size: 14px;">Length (cm)</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -929,7 +972,9 @@
     </div>
 
     <div class="camera-container" id="cameraContainer">
-        <video id="camera-feed" autoplay playsinline muted></video>
+        <div class="camera-view-wrapper">
+            <video id="camera-feed" autoplay playsinline muted></video>
+        </div>
         
         <!-- Distance indicator circle -->
         <div class="distance-indicator">
@@ -990,7 +1035,9 @@
             <p id="measurementInstruction">Align your face within the guide</p>
         </div>
         
-        <div id="measurementVisuals"></div>
+        <div id="measurementVisuals" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8;">
+            <!-- Measurement points and lines will be added here -->
+        </div>
         
         <div class="camera-controls">
             <button class="camera-btn primary" id="addPointBtn" onclick="addMeasurementPoint()">+</button>
@@ -1097,6 +1144,8 @@
         function init() {
             showQuestion(0);
             checkStoredMeasurements();
+            // Set camera as default method
+            toggleMeasurementMethod('camera');
         }
 
         function checkStoredMeasurements() {
@@ -1109,9 +1158,16 @@
 
         function updateMeasurementInputs() {
             if (measurements) {
+                // Update manual inputs
                 document.getElementById('neckInput').value = measurements.neck || '';
                 document.getElementById('shoulderInput').value = measurements.shoulders || '';
                 document.getElementById('lengthInput').value = measurements.length || '';
+                
+                // Update display values
+                document.getElementById('displayNeck').textContent = measurements.neck || '-';
+                document.getElementById('displayShoulders').textContent = measurements.shoulders || '-';
+                document.getElementById('displayLength').textContent = measurements.length || '-';
+                document.getElementById('currentMeasurements').style.display = 'block';
             }
         }
 
@@ -1128,6 +1184,9 @@
                 document.getElementById('manualInput').style.display = 'none';
                 document.getElementById('cameraButton').style.display = 'block';
             }
+            
+            // Always update measurement display
+            updateMeasurementInputs();
         }
 
         function saveManualMeasurements() {
@@ -1457,8 +1516,8 @@
             line.style.width = distance + 'px';
             line.style.transform = `rotate(${angle}deg)`;
             
-            // Adjusted calibration for face-based measurements
-            const calibrationFactor = 8; // Adjusted for face reference
+            // Adjusted calibration for zoomed out camera view
+            const calibrationFactor = 6; // Adjusted for 80% zoom
             const cm = (distance / calibrationFactor).toFixed(1);
             label.textContent = cm + ' cm';
             label.style.left = (p1.x + p2.x) / 2 + 'px';
@@ -1501,7 +1560,13 @@
                 localStorage.setItem('pillowMeasurements', JSON.stringify(measurements));
                 showToast('✓ Camera measurements saved!', 'success');
                 closeCameraMeasurement();
-                updateMeasurementInputs();
+                updateMeasurementInputs(); // Update the display values
+                
+                // Force update display even if toggled to manual
+                document.getElementById('displayNeck').textContent = measurements.neck || '-';
+                document.getElementById('displayShoulders').textContent = measurements.shoulders || '-';
+                document.getElementById('displayLength').textContent = measurements.length || '-';
+                document.getElementById('currentMeasurements').style.display = 'block';
             }
         }
 
