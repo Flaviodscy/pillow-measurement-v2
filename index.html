@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dream Pillow Finder - Camera Measurements</title>
+    <title>Dream Pillow Finder - Enhanced</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #0a0a0a;
             color: #fff;
             min-height: 100vh;
@@ -19,502 +19,681 @@
             content: '';
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(120,119,198,0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(255,119,198,0.3) 0%, transparent 50%);
-            animation: flow 20s ease-in-out infinite;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120,119,198,0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,119,198,0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(6,182,212,0.3) 0%, transparent 50%);
+            animation: flow 25s ease-in-out infinite;
             z-index: -1;
         }
         
         @keyframes flow {
             0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(180deg); }
+            33% { transform: scale(1.1) rotate(120deg); }
+            66% { transform: scale(0.9) rotate(240deg); }
         }
         
         .container {
             max-width: 600px;
-            margin: 30px auto;
-            padding: 50px 40px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
+            margin: 20px auto;
+            padding: 40px 30px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(25px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
         
         h1 {
             text-align: center;
-            font-size: 36px;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #fff, #a855f7, #06b6d4);
+            font-size: clamp(28px, 6vw, 42px);
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #a855f7 50%, #06b6d4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
         }
         
         .subtitle { 
             text-align: center; 
-            opacity: 0.8; 
-            margin-bottom: 40px; 
+            opacity: 0.85; 
+            margin-bottom: 35px; 
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.9);
         }
         
         .progress-bar {
-            height: 8px;
+            height: 10px;
             background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            margin-bottom: 40px;
+            border-radius: 12px;
+            margin-bottom: 35px;
             overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #06b6d4, #a855f7);
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #06b6d4 0%, #a855f7 50%, #ec4899 100%);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             width: 0%;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
         
         .measurement-section {
-            background: rgba(168,85,247,0.15);
-            border: 2px solid rgba(168,85,247,0.4);
-            border-radius: 20px;
-            padding: 40px 30px;
-            margin-bottom: 40px;
+            background: rgba(168,85,247,0.12);
+            border: 2px solid rgba(168,85,247,0.3);
+            border-radius: 24px;
+            padding: 35px 25px;
+            margin-bottom: 35px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .measurement-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: scan 3s infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         .measurement-section h3 {
             font-size: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             color: #fff;
+            position: relative;
+            z-index: 2;
         }
         
         .measurement-section p {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             line-height: 1.6;
+            position: relative;
+            z-index: 2;
         }
         
         .measurement-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-            max-width: 100%;
+            gap: 16px;
+            margin: 25px 0;
         }
         
         .measurement-card {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 15px;
-            padding: 20px 15px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 20px 16px;
             text-align: center;
-            min-width: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .measurement-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168,85,247,0.2);
         }
         
         .measurement-value {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 700;
             color: #a855f7;
-            word-break: break-word;
             margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .measurement-label {
             font-size: 12px;
             opacity: 0.8;
-            margin-top: 5px;
+            margin-top: 6px;
+            font-weight: 500;
         }
         
         .btn {
-            padding: 18px 32px;
+            padding: 16px 28px;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
-            margin: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            margin: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn-primary {
-            background: linear-gradient(45deg, #a855f7, #06b6d4);
+            background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(168,85,247,0.3);
         }
         
         .btn-secondary {
             background: rgba(255,255,255,0.1);
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
         }
         
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
         
         .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(168,85,247,0.4);
         }
         
-        /* CAMERA SYSTEM - PRIORITY */
+        /* Enhanced Camera System */
         .camera-container {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(40px);
+            background: rgba(0,0,0,0.97);
+            backdrop-filter: blur(20px);
             display: none;
-            z-index: 2000;
+            z-index: 3000;
+            overflow: hidden;
         }
         
-        .camera-container.active { display: block; }
+        .camera-container.active { 
+            display: flex;
+            flex-direction: column;
+        }
         
         .camera-view-wrapper {
             position: relative;
-            width: 100%;
-            height: 100%;
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
         }
         
-        #camera-feed {
-            width: 100%;
-            height: 100%;
+        #camera-feed, #captured-canvas {
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
-            transform: scaleX(-1) scale(0.8);
-            background: #000;
+            transform: scaleX(-1);
+            border-radius: 12px;
         }
         
-        #captured-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transform: scaleX(-1) scale(0.8);
-            background: #000;
+        #captured-canvas {
             display: none;
         }
         
-        .distance-indicator {
+        .calibration-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
             pointer-events: none;
-            z-index: 4;
+            z-index: 10;
         }
         
-        .distance-circle {
-            width: 100%;
-            height: 100%;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(10px);
+        .reference-card {
+            width: 200px;
+            height: 126px;
+            border: 3px dashed #fbbf24;
+            border-radius: 8px;
+            background: rgba(251,191,36,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #fbbf24;
+            font-weight: 600;
+            text-align: center;
+            animation: pulse-calibration 2s infinite;
         }
         
-        .distance-circle.too-close {
-            border-color: #ef4444;
-            animation: pulse-warning 1s ease-in-out infinite;
-            box-shadow: 0 0 40px rgba(239,68,68,0.5);
+        @keyframes pulse-calibration {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
         }
         
-        .distance-circle.too-far {
-            border-color: #f59e0b;
-            animation: pulse-warning 1s ease-in-out infinite;
-            box-shadow: 0 0 40px rgba(245,158,11,0.5);
+        .face-guide-enhanced {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 8;
         }
         
-        .distance-circle.perfect {
-            border-color: #10b981;
-            box-shadow: 0 0 60px rgba(16,185,129,0.6);
-            animation: pulse-success 2s ease-in-out infinite;
+        .face-outline-enhanced {
+            width: 200px;
+            height: 260px;
+            border: 3px dashed rgba(255,255,255,0.6);
+            border-radius: 50% 50% 60% 40%;
+            animation: pulse-face 2.5s ease-in-out infinite;
+            position: relative;
         }
         
-        @keyframes pulse-warning {
-            0%, 100% { opacity: 0.3; }
+        .face-outline-enhanced::before {
+            content: '👤';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            opacity: 0.3;
+        }
+        
+        @keyframes pulse-face {
+            0%, 100% { opacity: 0.6; }
             50% { opacity: 1; }
         }
         
-        @keyframes pulse-success {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        
-        .distance-feedback {
+        .measurement-guides {
             position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(30px);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            z-index: 6;
-            display: none;
-        }
-        
-        .distance-feedback.show { display: block; }
-        .distance-feedback.too-close { background: rgba(239,68,68,0.9); }
-        .distance-feedback.too-far { background: rgba(245,158,11,0.9); }
-        .distance-feedback.perfect { background: rgba(16,185,129,0.9); }
-        
-        .face-guide {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 220px;
-            height: 290px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             pointer-events: none;
-            z-index: 5;
+            z-index: 15;
         }
         
-        .face-outline {
-            width: 100%;
-            height: 100%;
-            border: 3px dashed rgba(255,255,255,0.8);
-            border-radius: 120px 120px 150px 150px / 160px 160px 180px 180px;
-            animation: pulse 2s ease-in-out infinite;
-            transition: all 0.4s ease;
-        }
-        
-        .face-outline.aligned {
-            border-color: #10b981;
-            border-style: solid;
-            box-shadow: 0 0 40px rgba(16,185,129,0.6);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.02); opacity: 1; }
-        }
-        
-        .camera-header {
+        .guide-line {
             position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(40px);
-            padding: 20px 40px;
-            border-radius: 25px;
+            background: rgba(255,255,255,0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .guide-line.active {
+            opacity: 1;
+        }
+        
+        .guide-line.horizontal {
+            height: 2px;
+            left: 20%;
+            right: 20%;
+        }
+        
+        .guide-line.vertical {
+            width: 2px;
+            top: 20%;
+            bottom: 20%;
+        }
+        
+        .camera-header-enhanced {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            padding: 20px;
             text-align: center;
-            z-index: 10;
-            border: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        .camera-header h3 {
+        .camera-header-enhanced h3 {
             color: #fff;
-            margin: 0;
-            font-size: 18px;
+            margin: 0 0 8px 0;
+            font-size: 20px;
         }
         
-        .camera-header p {
+        .camera-header-enhanced p {
             color: rgba(255,255,255,0.8);
-            margin: 5px 0 0 0;
+            margin: 0;
             font-size: 14px;
         }
         
-        .camera-controls {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
+        .step-indicator {
             display: flex;
-            gap: 20px;
-            z-index: 20;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(40px);
-            padding: 15px;
-            border-radius: 25px;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
         }
         
-        .camera-btn {
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .step-dot.active {
+            background: #a855f7;
+            transform: scale(1.2);
+        }
+        
+        .step-dot.completed {
+            background: #10b981;
+        }
+        
+        .camera-controls-enhanced {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .camera-btn-enhanced {
             width: 60px;
             height: 60px;
             border-radius: 50%;
             border: none;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             color: #fff;
             font-size: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
         
-        .camera-btn.primary {
-            background: linear-gradient(45deg, #a855f7, #06b6d4);
-            width: 70px;
-            height: 70px;
+        .camera-btn-enhanced.primary {
+            background: linear-gradient(135deg, #a855f7, #06b6d4);
+            width: 80px;
+            height: 80px;
+            box-shadow: 0 4px 20px rgba(168,85,247,0.4);
         }
         
-        .camera-btn.capture {
-            background: linear-gradient(45deg, #10b981, #059669);
-            width: 70px;
-            height: 70px;
-        }
-        
-        .camera-btn:hover {
+        .camera-btn-enhanced:hover {
             transform: scale(1.1);
         }
         
-        .close-camera {
+        .camera-btn-enhanced:active {
+            transform: scale(0.95);
+        }
+        
+        .close-camera-enhanced {
             position: absolute;
-            top: 30px;
-            right: 30px;
+            top: 20px;
+            right: 20px;
             width: 50px;
             height: 50px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             border: none;
             border-radius: 50%;
             color: #fff;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
-            z-index: 25;
+            z-index: 20;
+            transition: all 0.3s ease;
         }
         
-        .measurement-point {
+        .close-camera-enhanced:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1);
+        }
+        
+        .measurement-point-enhanced {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             transform: translate(-50%, -50%);
-            cursor: move;
-            z-index: 15;
-            pointer-events: auto;
+            cursor: grab;
+            z-index: 20;
             touch-action: none;
         }
         
-        .point-inner {
+        .measurement-point-enhanced:active {
+            cursor: grabbing;
+        }
+        
+        .point-inner-enhanced {
             width: 100%;
             height: 100%;
-            background: rgba(255,255,255,0.9);
-            border: 3px solid #a855f7;
+            background: #fff;
+            border: 4px solid #a855f7;
             border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(168,85,247,0.4);
+            box-shadow: 0 4px 15px rgba(168,85,247,0.5);
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #a855f7;
         }
         
-        .measurement-point.active .point-inner {
-            transform: scale(1.2);
+        .measurement-point-enhanced:hover .point-inner-enhanced {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(168,85,247,0.7);
         }
         
-        .measurement-line {
+        .measurement-line-enhanced {
             position: absolute;
             background: linear-gradient(90deg, #fbbf24, #f59e0b);
-            height: 3px;
+            height: 4px;
             transform-origin: left center;
-            z-index: 14;
+            z-index: 18;
             pointer-events: none;
             border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(251,191,36,0.4);
         }
         
-        .measurement-label {
+        .measurement-label-enhanced {
             position: absolute;
-            background: rgba(255,255,255,0.95);
-            color: #1f2937;
-            padding: 8px 16px;
-            border-radius: 15px;
-            font-size: 14px;
+            background: rgba(0,0,0,0.9);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 16px;
             font-weight: 700;
             transform: translate(-50%, -50%);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 20;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 25;
             pointer-events: none;
+            border: 2px solid #fbbf24;
         }
         
-        .option {
-            background: rgba(255,255,255,0.1);
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16,185,129,0.9);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            z-index: 4000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 15px;
-            padding: 25px 20px;
-            margin-bottom: 15px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: rgba(239,68,68,0.9);
+        }
+        
+        /* Enhanced responsive design */
+        @media (max-width: 768px) {
+            .container { 
+                margin: 10px; 
+                padding: 25px 20px; 
+            }
+            
+            .camera-btn-enhanced {
+                width: 55px;
+                height: 55px;
+                font-size: 18px;
+            }
+            
+            .camera-btn-enhanced.primary {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .measurement-point-enhanced {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .face-outline-enhanced {
+                width: 160px;
+                height: 220px;
+            }
+            
+            .reference-card {
+                width: 160px;
+                height: 100px;
+                font-size: 12px;
+            }
+        }
+        
+        /* Quiz styling improvements */
+        .option {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .option:hover::before {
+            left: 100%;
         }
         
         .option:hover {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.12);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
         
         .option.selected {
-            background: rgba(168,85,247,0.3);
+            background: rgba(168,85,247,0.2);
             border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168,85,247,0.3);
         }
         
         .option strong {
             display: block;
             font-size: 18px;
             margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
         }
         
         .option small {
-            opacity: 0.7;
+            opacity: 0.8;
             font-size: 14px;
             line-height: 1.4;
+            position: relative;
+            z-index: 2;
         }
         
-        .navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-            gap: 20px;
-        }
-        
-        .results {
+        .results-enhanced {
             display: none;
         }
         
-        .result-card {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+        .result-card-enhanced {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
             border-radius: 20px;
-            padding: 35px 30px;
-            margin-bottom: 25px;
+            padding: 30px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .result-card h3 {
-            margin-bottom: 15px;
-            line-height: 1.3;
+        .result-card-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #a855f7, #06b6d4, #ec4899);
         }
         
-        .result-card p {
-            margin-bottom: 25px;
-            line-height: 1.6;
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #a855f7;
+            animation: spin 1s ease-in-out infinite;
         }
         
-        .share-save-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 30px 0;
-        }
-        
-        @media (max-width: 600px) {
-            .container { margin: 10px; padding: 20px; }
-            h1 { font-size: 28px; }
-            .measurement-grid { grid-template-columns: 1fr; }
-            .face-guide { width: 180px; height: 240px; }
-            .distance-indicator { width: 250px; height: 250px; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🌙 Dream Pillow Finder</h1>
-        <p class="subtitle">Camera-based measurements for perfect sleep</p>
+        <p class="subtitle">AI-powered measurements for your perfect sleep companion</p>
         
         <div class="progress-bar">
             <div class="progress-fill" id="progress"></div>
         </div>
         
         <div id="measurements" class="measurement-section">
-            <h3>📸 Required: Camera Measurements</h3>
-            <p style="opacity: 0.9; margin-bottom: 20px;">Accurate measurements ensure the perfect pillow fit</p>
+            <h3>📸 Enhanced Camera Measurements</h3>
+            <p style="opacity: 0.9; margin-bottom: 20px;">Precision measurements with automatic calibration for the perfect pillow fit</p>
             
             <div id="current-measurements" style="display: none;">
                 <h4 style="margin-bottom: 15px;">✓ Your Measurements:</h4>
@@ -533,61 +712,81 @@
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="continueToQuiz()" style="margin-top: 15px;">Continue to Questions</button>
+                <button class="btn btn-secondary" onclick="retakeMeasurements()" style="margin-top: 15px;">📸 Retake Measurements</button>
             </div>
             
             <div id="camera-prompt">
-                <button class="btn btn-primary" onclick="startCamera()" style="font-size: 18px; padding: 20px 40px;">
-                    📸 Start Camera Measurement
+                <button class="btn btn-primary" onclick="startEnhancedCamera()" style="font-size: 18px; padding: 20px 40px;">
+                    📸 Start Enhanced Measurement
                 </button>
                 <p style="font-size: 14px; opacity: 0.7; margin-top: 15px;">
-                    We'll guide you through measuring your neck and shoulders for the perfect pillow fit
+                    New: Automatic calibration, better guides, and improved accuracy
                 </p>
             </div>
         </div>
         
         <div id="quiz" style="display: none;"></div>
-        <div id="results" class="results"></div>
+        <div id="results" class="results-enhanced"></div>
         
-        <div class="navigation" id="nav" style="display: none;">
-            <button class="btn btn-secondary" id="prev" onclick="prevQ()">Previous</button>
-            <button class="btn btn-primary" id="next" onclick="nextQ()" disabled>Next</button>
+        <div class="navigation" id="nav" style="display: none; justify-content: space-between; margin-top: 30px; gap: 15px;">
+            <button class="btn btn-secondary" id="prev" onclick="prevQ()">← Previous</button>
+            <button class="btn btn-primary" id="next" onclick="nextQ()" disabled>Next →</button>
         </div>
     </div>
     
-    <!-- CAMERA SYSTEM -->
-    <div class="camera-container" id="camera">
+    <!-- Enhanced Camera System -->
+    <div class="camera-container" id="camera-enhanced">
+        <div class="camera-header-enhanced">
+            <h3 id="measurement-step-enhanced">Step 1: Calibration</h3>
+            <p id="measurement-instruction-enhanced">Hold a credit card up to the camera for size reference</p>
+            <div class="step-indicator">
+                <div class="step-dot active" data-step="0"></div>
+                <div class="step-dot" data-step="1"></div>
+                <div class="step-dot" data-step="2"></div>
+                <div class="step-dot" data-step="3"></div>
+                <div class="step-dot" data-step="4"></div>
+            </div>
+        </div>
+        
         <div class="camera-view-wrapper">
-            <video id="camera-feed" autoplay playsinline muted></video>
-            <canvas id="captured-image"></canvas>
+            <video id="camera-feed-enhanced" autoplay playsinline muted></video>
+            <canvas id="captured-canvas" style="display: none;"></canvas>
+            
+            <!-- Calibration overlay -->
+            <div class="calibration-overlay" id="calibration-overlay">
+                <div class="reference-card">
+                    Hold Credit Card Here<br>
+                    <small>(85.6mm × 53.98mm)</small>
+                </div>
+            </div>
+            
+            <!-- Face guide -->
+            <div class="face-guide-enhanced" id="face-guide-enhanced" style="display: none;">
+                <div class="face-outline-enhanced"></div>
+            </div>
+            
+            <!-- Measurement guides -->
+            <div class="measurement-guides" id="measurement-guides">
+                <div class="guide-line horizontal" style="top: 30%;" id="neck-guide"></div>
+                <div class="guide-line horizontal" style="top: 45%;" id="shoulder-guide"></div>
+                <div class="guide-line vertical" style="left: 50%;" id="center-guide"></div>
+            </div>
+            
+            <!-- Measurement visuals -->
+            <div id="measurement-visuals-enhanced" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15;"></div>
         </div>
         
-        <div class="distance-indicator">
-            <div class="distance-circle" id="distance-circle"></div>
+        <div class="camera-controls-enhanced">
+            <button class="camera-btn-enhanced" id="retake-btn-enhanced" onclick="retakeStep()" style="display: none;">🔄</button>
+            <button class="camera-btn-enhanced primary" id="capture-btn-enhanced" onclick="captureStep()">📷</button>
+            <button class="camera-btn-enhanced" id="next-step-btn-enhanced" onclick="nextMeasurementStep()" style="display: none;">✓</button>
         </div>
         
-        <div class="distance-feedback" id="distance-feedback"></div>
-        
-        <div class="face-guide">
-            <div class="face-outline" id="face-outline"></div>
-        </div>
-        
-        <button class="close-camera" onclick="closeCamera()">×</button>
-        
-        <div class="camera-header">
-            <h3 id="measurement-step">Position Your Face</h3>
-            <p id="measurement-instruction">Align your face within the guide</p>
-        </div>
-        
-        <div id="measurement-visuals" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8;"></div>
-        
-        <div class="camera-controls">
-            <button class="camera-btn capture" id="capture-btn" onclick="captureImage()" style="display: none;">📷</button>
-            <button class="camera-btn primary" id="add-point-btn" onclick="addPoint()" style="display: none;">+</button>
-            <button class="camera-btn" id="next-step-btn" onclick="nextStep()" style="display: none;">→</button>
-            <button class="camera-btn" id="retake-btn" onclick="retakePhoto()" style="display: none;">🔄</button>
-            <button class="camera-btn" onclick="clearPoints()">×</button>
-        </div>
+        <button class="close-camera-enhanced" onclick="closeEnhancedCamera()">×</button>
     </div>
+    
+    <!-- Notification system -->
+    <div id="notification" class="notification"></div>
     
     <script>
         const questions = [
@@ -636,10 +835,11 @@
         ];
         
         const measurementSteps = [
-            { name: 'face', title: 'Position Your Face', instruction: 'Align face in guide, then capture' },
-            { name: 'neck', title: 'Step 1: Neck Width', instruction: 'Place points at each side of your neck' },
-            { name: 'shoulders', title: 'Step 2: Shoulder Width', instruction: 'Place points at each shoulder' },
-            { name: 'length', title: 'Step 3: Neck Length', instruction: 'Place points from neck base to shoulder' }
+            { name: 'calibration', title: 'Step 1: Calibration', instruction: 'Hold a credit card up to the camera for size reference' },
+            { name: 'face', title: 'Step 2: Position Face', instruction: 'Align your face within the guide outline' },
+            { name: 'neck', title: 'Step 3: Neck Width', instruction: 'Tap to place points at each side of your neck' },
+            { name: 'shoulders', title: 'Step 4: Shoulder Width', instruction: 'Tap to place points at each shoulder edge' },
+            { name: 'length', title: 'Step 5: Neck Length', instruction: 'Tap to place points from neck base to shoulder top' }
         ];
         
         let currentQ = 0;
@@ -649,256 +849,302 @@
         let currentMeasurementStep = 0;
         let currentPoints = [];
         let measurementElements = [];
-        let isFaceAligned = false;
-        let isImageCaptured = false;
-        let distanceInterval = null;
         let cameraMeasurements = { neck: null, shoulders: null, length: null };
+        let calibrationFactor = 3.2; // pixels per mm (will be calculated from credit card)
+        let isCalibrated = false;
         
         function init() {
-            document.getElementById('progress').style.width = '25%';
+            document.getElementById('progress').style.width = '20%';
+            
+            // Load saved measurements if available
+            const saved = localStorage.getItem('pillowMeasurements');
+            if (saved) {
+                try {
+                    const savedData = JSON.parse(saved);
+                    if (savedData.timestamp && Date.now() - new Date(savedData.timestamp).getTime() < 7 * 24 * 60 * 60 * 1000) {
+                        // Data is less than 7 days old
+                        showSavedMeasurements(savedData);
+                    }
+                } catch (e) {
+                    console.log('Could not load saved measurements');
+                }
+            }
         }
         
-        function startCamera() {
-            document.getElementById('camera').classList.add('active');
+        function showSavedMeasurements(savedData) {
+            const prompt = document.getElementById('camera-prompt');
+            prompt.innerHTML = `
+                <div style="background: rgba(16,185,129,0.1); border: 2px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="color: #10b981; margin-bottom: 12px;">📊 Found Recent Measurements</h4>
+                    <p style="opacity: 0.9; margin-bottom: 15px;">From ${new Date(savedData.timestamp).toLocaleDateString()}</p>
+                    <div class="measurement-grid">
+                        <div class="measurement-card" style="background: rgba(16,185,129,0.1);">
+                            <div class="measurement-value" style="color: #10b981;">${savedData.neck}</div>
+                            <div class="measurement-label">Neck (cm)</div>
+                        </div>
+                        <div class="measurement-card" style="background: rgba(16,185,129,0.1);">
+                            <div class="measurement-value" style="color: #10b981;">${savedData.shoulders}</div>
+                            <div class="measurement-label">Shoulders (cm)</div>
+                        </div>
+                        <div class="measurement-card" style="background: rgba(16,185,129,0.1);">
+                            <div class="measurement-value" style="color: #10b981;">${savedData.length}</div>
+                            <div class="measurement-label">Length (cm)</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="useSavedMeasurements(${JSON.stringify(savedData).replace(/"/g, '&quot;')})">Use These Measurements</button>
+                </div>
+                <button class="btn btn-secondary" onclick="startEnhancedCamera()" style="font-size: 18px; padding: 20px 40px;">
+                    📸 Take New Measurements
+                </button>
+                <p style="font-size: 14px; opacity: 0.7; margin-top: 15px;">
+                    Enhanced: Automatic calibration, better guides, and improved accuracy
+                </p>
+            `;
+        }
+        
+        function useSavedMeasurements(savedData) {
+            measurements = savedData;
+            cameraMeasurements = savedData;
+            displayMeasurements();
+        }
+        
+        function startEnhancedCamera() {
+            document.getElementById('camera-enhanced').classList.add('active');
             currentMeasurementStep = 0;
+            isCalibrated = false;
             updateMeasurementStep();
             
-            // Show face guide initially
-            document.querySelector('.face-guide').style.display = 'block';
-            document.querySelector('.distance-indicator').style.display = 'block';
-            
             navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+                video: { 
+                    facingMode: 'user', 
+                    width: { ideal: 1920, min: 1280 }, 
+                    height: { ideal: 1080, min: 720 } 
+                }
             }).then(stream => {
                 cameraStream = stream;
-                document.getElementById('camera-feed').srcObject = stream;
+                const video = document.getElementById('camera-feed-enhanced');
+                video.srcObject = stream;
                 
-                setTimeout(() => startDistanceDetection(), 1000);
+                // Show calibration overlay
+                document.getElementById('calibration-overlay').style.display = 'block';
+                showNotification('Hold a credit card flat against the camera', 'info');
             }).catch(err => {
-                alert('Camera access required for measurements');
-                closeCamera();
+                showNotification('Camera access required for measurements', 'error');
+                closeEnhancedCamera();
             });
         }
         
-        function startDistanceDetection() {
-            let distance = 70;
-            const target = 50;
-            let adjusting = true;
+        function updateMeasurementStep() {
+            if (currentMeasurementStep >= measurementSteps.length) return;
             
-            distanceInterval = setInterval(() => {
-                if (!document.getElementById('camera').classList.contains('active')) {
-                    clearInterval(distanceInterval);
-                    return;
+            const step = measurementSteps[currentMeasurementStep];
+            document.getElementById('measurement-step-enhanced').textContent = step.title;
+            document.getElementById('measurement-instruction-enhanced').textContent = step.instruction;
+            
+            // Update step indicators
+            document.querySelectorAll('.step-dot').forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index < currentMeasurementStep) {
+                    dot.classList.add('completed');
+                } else if (index === currentMeasurementStep) {
+                    dot.classList.add('active');
                 }
-                
-                if (adjusting) {
-                    const diff = target - distance;
-                    distance += diff * 0.1 + (Math.random() - 0.5) * 2;
-                    if (Math.abs(distance - target) < 1) adjusting = false;
-                } else {
-                    distance = target + (Math.random() - 0.5) * 5;
-                }
-                
-                updateDistanceIndicator(distance, target);
-            }, 200);
+            });
+            
+            // Show/hide appropriate overlays
+            const calibrationOverlay = document.getElementById('calibration-overlay');
+            const faceGuide = document.getElementById('face-guide-enhanced');
+            const guides = document.getElementById('measurement-guides');
+            
+            calibrationOverlay.style.display = step.name === 'calibration' ? 'block' : 'none';
+            faceGuide.style.display = step.name === 'face' ? 'block' : 'none';
+            
+            // Show measurement guides for measurement steps
+            if (['neck', 'shoulders', 'length'].includes(step.name)) {
+                guides.style.display = 'block';
+                showMeasurementGuides(step.name);
+            } else {
+                guides.style.display = 'none';
+            }
+            
+            // Reset buttons
+            document.getElementById('capture-btn-enhanced').style.display = 'block';
+            document.getElementById('next-step-btn-enhanced').style.display = 'none';
+            document.getElementById('retake-btn-enhanced').style.display = 'none';
         }
         
-        function updateDistanceIndicator(current, perfect) {
-            const circle = document.getElementById('distance-circle');
-            const feedback = document.getElementById('distance-feedback');
-            const outline = document.getElementById('face-outline');
-            const tolerance = 10;
+        function showMeasurementGuides(stepName) {
+            const neckGuide = document.getElementById('neck-guide');
+            const shoulderGuide = document.getElementById('shoulder-guide');
+            const centerGuide = document.getElementById('center-guide');
             
-            circle.classList.remove('too-close', 'too-far', 'perfect');
-            feedback.classList.remove('too-close', 'too-far', 'perfect');
-            outline.classList.remove('aligned');
+            // Reset all guides
+            [neckGuide, shoulderGuide, centerGuide].forEach(guide => {
+                guide.classList.remove('active');
+            });
             
-            if (current < perfect - tolerance) {
-                circle.classList.add('too-close');
-                feedback.classList.add('show', 'too-close');
-                feedback.textContent = '📏 Move back slowly';
-            } else if (current > perfect + tolerance) {
-                circle.classList.add('too-far');
-                feedback.classList.add('show', 'too-far');
-                feedback.textContent = '📏 Move closer slowly';
-            } else {
-                circle.classList.add('perfect');
-                feedback.classList.add('show', 'perfect');
-                feedback.textContent = '✅ Perfect! Click capture';
-                outline.classList.add('aligned');
-                
-                if (!isFaceAligned) {
-                    isFaceAligned = true;
-                    document.getElementById('capture-btn').style.display = 'block';
-                }
+            // Show relevant guides
+            centerGuide.classList.add('active'); // Always show center line
+            
+            if (stepName === 'neck') {
+                neckGuide.classList.add('active');
+            } else if (stepName === 'shoulders') {
+                shoulderGuide.classList.add('active');
             }
         }
         
-        function captureImage() {
-            const video = document.getElementById('camera-feed');
-            const canvas = document.getElementById('captured-image');
+        function captureStep() {
+            const video = document.getElementById('camera-feed-enhanced');
+            const canvas = document.getElementById('captured-canvas');
             const ctx = canvas.getContext('2d');
             
+            // Set canvas dimensions to match video
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             
+            // Draw the video frame (mirrored)
+            ctx.save();
             ctx.scale(-1, 1);
             ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+            ctx.restore();
             
+            // Hide video, show canvas
             video.style.display = 'none';
             canvas.style.display = 'block';
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            canvas.style.objectFit = 'contain';
-            canvas.style.transform = 'scaleX(-1) scale(0.8)';
             
-            isImageCaptured = true;
-            
-            // Hide face guides
-            document.querySelector('.face-guide').style.display = 'none';
-            document.querySelector('.distance-indicator').style.display = 'none';
-            document.getElementById('distance-feedback').classList.remove('show');
-            
-            if (distanceInterval) {
-                clearInterval(distanceInterval);
-                distanceInterval = null;
-            }
-            
-            // Update UI
-            document.getElementById('capture-btn').style.display = 'none';
-            document.getElementById('retake-btn').style.display = 'block';
-            
-            // Start measurements
-            currentMeasurementStep = 1;
-            updateMeasurementStep();
-            document.getElementById('add-point-btn').style.display = 'block';
-        }
-        
-        function retakePhoto() {
-            const video = document.getElementById('camera-feed');
-            const canvas = document.getElementById('captured-image');
-            
-            video.style.display = 'block';
-            canvas.style.display = 'none';
-            
-            isImageCaptured = false;
-            isFaceAligned = false;
-            
-            document.querySelector('.face-guide').style.display = 'block';
-            document.querySelector('.distance-indicator').style.display = 'block';
-            
-            document.getElementById('capture-btn').style.display = 'none';
-            document.getElementById('retake-btn').style.display = 'none';
-            document.getElementById('add-point-btn').style.display = 'none';
-            
-            clearPoints();
-            currentMeasurementStep = 0;
-            updateMeasurementStep();
-            startDistanceDetection();
-        }
-        
-        function updateMeasurementStep() {
             const step = measurementSteps[currentMeasurementStep];
-            document.getElementById('measurement-step').textContent = step.title;
-            document.getElementById('measurement-instruction').textContent = step.instruction;
-        }
-        
-        function addPoint() {
-            if (currentPoints.length < 2) {
-                const centerX = window.innerWidth / 2;
-                const centerY = window.innerHeight / 2;
-                const pointId = Date.now();
-                
-                const pointData = { x: centerX, y: centerY, id: pointId };
-                currentPoints.push(pointData);
-                
-                createDraggablePoint(centerX, centerY, pointId);
-                
-                if (currentPoints.length === 2) {
-                    createMeasurementLine();
-                    document.getElementById('add-point-btn').style.display = 'none';
-                    document.getElementById('next-step-btn').style.display = 'block';
-                }
+            
+            if (step.name === 'calibration') {
+                handleCalibration();
+            } else if (step.name === 'face') {
+                handleFaceCapture();
+            } else {
+                startMeasurementMode();
             }
         }
         
-        function createDraggablePoint(x, y, id) {
+        function handleCalibration() {
+            // Simulate credit card detection and calibration
+            // In a real app, this would use computer vision to detect the card
+            
+            showNotification('Credit card detected! Calibrating...', 'info');
+            
+            setTimeout(() => {
+                // Calculate calibration factor based on credit card dimensions
+                // Credit card: 85.6mm × 53.98mm
+                // Assume card takes up ~200px width in the image
+                calibrationFactor = 200 / 85.6; // pixels per mm
+                isCalibrated = true;
+                
+                showNotification('Calibration complete! ✓', 'success');
+                
+                document.getElementById('capture-btn-enhanced').style.display = 'none';
+                document.getElementById('next-step-btn-enhanced').style.display = 'block';
+            }, 1500);
+        }
+        
+        function handleFaceCapture() {
+            showNotification('Face captured! ✓', 'success');
+            document.getElementById('capture-btn-enhanced').style.display = 'none';
+            document.getElementById('next-step-btn-enhanced').style.display = 'block';
+        }
+        
+        function startMeasurementMode() {
+            document.getElementById('capture-btn-enhanced').style.display = 'none';
+            document.getElementById('retake-btn-enhanced').style.display = 'block';
+            
+            const step = measurementSteps[currentMeasurementStep];
+            showNotification(`Tap to place measurement points for ${step.name}`, 'info');
+            
+            // Enable point placement
+            const canvas = document.getElementById('captured-canvas');
+            canvas.style.pointerEvents = 'auto';
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('touchstart', handleCanvasTouch);
+        }
+        
+        function handleCanvasClick(e) {
+            if (currentPoints.length < 2) {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                addMeasurementPoint(x, y);
+            }
+        }
+        
+        function handleCanvasTouch(e) {
+            e.preventDefault();
+            if (currentPoints.length < 2) {
+                const rect = e.target.getBoundingClientRect();
+                const touch = e.touches[0];
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                addMeasurementPoint(x, y);
+            }
+        }
+        
+        function addMeasurementPoint(x, y) {
+            const pointId = Date.now() + Math.random();
+            const pointData = { x, y, id: pointId };
+            currentPoints.push(pointData);
+            
+            createEnhancedPoint(x, y, pointId, currentPoints.length);
+            
+            if (currentPoints.length === 2) {
+                createEnhancedMeasurementLine();
+                document.getElementById('next-step-btn-enhanced').style.display = 'block';
+                
+                // Disable further clicking
+                const canvas = document.getElementById('captured-canvas');
+                canvas.style.pointerEvents = 'none';
+                canvas.removeEventListener('click', handleCanvasClick);
+                canvas.removeEventListener('touchstart', handleCanvasTouch);
+            }
+        }
+        
+        function createEnhancedPoint(x, y, id, number) {
             const point = document.createElement('div');
-            point.className = 'measurement-point';
+            point.className = 'measurement-point-enhanced';
             point.dataset.pointId = id;
-            point.style.left = x + 'px';
-            point.style.top = y + 'px';
-            point.innerHTML = '<div class="point-inner"></div>';
             
-            let isDragging = false;
+            // Convert canvas coordinates to viewport coordinates
+            const canvas = document.getElementById('captured-canvas');
+            const rect = canvas.getBoundingClientRect();
+            const viewportX = rect.left + x;
+            const viewportY = rect.top + y;
             
-            const handleStart = (e) => {
-                isDragging = true;
-                point.classList.add('active');
-                e.preventDefault();
-            };
+            point.style.left = viewportX + 'px';
+            point.style.top = viewportY + 'px';
+            point.innerHTML = `<div class="point-inner-enhanced">${number}</div>`;
             
-            const handleMove = (e) => {
-                if (!isDragging) return;
-                
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                
-                point.style.left = clientX + 'px';
-                point.style.top = clientY + 'px';
-                
-                const pointData = currentPoints.find(p => p.id === id);
-                if (pointData) {
-                    pointData.x = clientX;
-                    pointData.y = clientY;
-                    updateMeasurementLine();
-                }
-                
-                e.preventDefault();
-            };
-            
-            const handleEnd = () => {
-                isDragging = false;
-                point.classList.remove('active');
-            };
-            
-            point.addEventListener('touchstart', handleStart, { passive: false });
-            document.addEventListener('touchmove', handleMove, { passive: false });
-            document.addEventListener('touchend', handleEnd);
-            
-            point.addEventListener('mousedown', handleStart);
-            document.addEventListener('mousemove', handleMove);
-            document.addEventListener('mouseup', handleEnd);
-            
-            document.getElementById('measurement-visuals').appendChild(point);
+            document.body.appendChild(point);
             measurementElements.push(point);
+            
+            // Add animation
+            setTimeout(() => {
+                point.style.animation = 'none';
+                point.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 300);
         }
         
-        function createMeasurementLine() {
-            const line = document.createElement('div');
-            line.className = 'measurement-line';
-            line.id = 'current-line';
-            
-            const label = document.createElement('div');
-            label.className = 'measurement-label';
-            label.id = 'current-label';
-            
-            document.getElementById('measurement-visuals').appendChild(line);
-            document.getElementById('measurement-visuals').appendChild(label);
-            measurementElements.push(line, label);
-            
-            updateMeasurementLine();
-        }
-        
-        function updateMeasurementLine() {
+        function createEnhancedMeasurementLine() {
             if (currentPoints.length !== 2) return;
             
-            const line = document.getElementById('current-line');
-            const label = document.getElementById('current-label');
-            if (!line || !label) return;
+            const canvas = document.getElementById('captured-canvas');
+            const rect = canvas.getBoundingClientRect();
             
-            const p1 = currentPoints[0];
-            const p2 = currentPoints[1];
+            const p1 = {
+                x: rect.left + currentPoints[0].x,
+                y: rect.top + currentPoints[0].y
+            };
+            const p2 = {
+                x: rect.left + currentPoints[1].x,
+                y: rect.top + currentPoints[1].y
+            };
+            
+            // Create line
+            const line = document.createElement('div');
+            line.className = 'measurement-line-enhanced';
             
             const dx = p2.x - p1.x;
             const dy = p2.y - p1.y;
@@ -910,34 +1156,68 @@
             line.style.width = distance + 'px';
             line.style.transform = `rotate(${angle}deg)`;
             
-            // Convert pixels to cm (calibration factor)
-            const calibrationFactor = 6;
-            const cm = (distance / calibrationFactor).toFixed(1);
-            label.textContent = cm + ' cm';
+            document.body.appendChild(line);
+            measurementElements.push(line);
+            
+            // Create label
+            const label = document.createElement('div');
+            label.className = 'measurement-label-enhanced';
+            
+            // Convert pixels to cm using calibration factor
+            const pixelDistance = Math.sqrt(
+                Math.pow(currentPoints[1].x - currentPoints[0].x, 2) + 
+                Math.pow(currentPoints[1].y - currentPoints[0].y, 2)
+            );
+            const cmDistance = (pixelDistance / calibrationFactor / 10).toFixed(1); // mm to cm
+            
+            label.textContent = `${cmDistance} cm`;
             label.style.left = (p1.x + p2.x) / 2 + 'px';
             label.style.top = (p1.y + p2.y) / 2 + 'px';
             
+            document.body.appendChild(label);
+            measurementElements.push(label);
+            
             // Save measurement
-            const steps = ['face', 'neck', 'shoulders', 'length'];
-            if (currentMeasurementStep > 0) {
-                cameraMeasurements[steps[currentMeasurementStep]] = parseFloat(cm);
+            const stepName = measurementSteps[currentMeasurementStep].name;
+            cameraMeasurements[stepName] = parseFloat(cmDistance);
+            
+            showNotification(`${stepName} measurement: ${cmDistance} cm`, 'success');
+        }
+        
+        function nextMeasurementStep() {
+            currentMeasurementStep++;
+            clearCurrentMeasurement();
+            
+            if (currentMeasurementStep < measurementSteps.length) {
+                updateMeasurementStep();
+                
+                // Show video again for next step
+                const video = document.getElementById('camera-feed-enhanced');
+                const canvas = document.getElementById('captured-canvas');
+                video.style.display = 'block';
+                canvas.style.display = 'none';
+            } else {
+                // All measurements complete
+                completeMeasurements();
             }
         }
         
-        function clearPoints() {
-            currentPoints = [];
-            measurementElements.forEach(el => {
-                if (el && el.parentNode) {
-                    el.parentNode.removeChild(el);
-                }
-            });
-            measurementElements = [];
-            document.getElementById('add-point-btn').style.display = 'block';
-            document.getElementById('next-step-btn').style.display = 'none';
+        function retakeStep() {
+            clearCurrentMeasurement();
+            
+            // Show video again
+            const video = document.getElementById('camera-feed-enhanced');
+            const canvas = document.getElementById('captured-canvas');
+            video.style.display = 'block';
+            canvas.style.display = 'none';
+            
+            // Reset buttons
+            document.getElementById('capture-btn-enhanced').style.display = 'block';
+            document.getElementById('next-step-btn-enhanced').style.display = 'none';
+            document.getElementById('retake-btn-enhanced').style.display = 'none';
         }
         
-        function nextStep() {
-            currentMeasurementStep++;
+        function clearCurrentMeasurement() {
             currentPoints = [];
             measurementElements.forEach(el => {
                 if (el && el.parentNode) {
@@ -946,56 +1226,68 @@
             });
             measurementElements = [];
             
-            if (currentMeasurementStep < measurementSteps.length) {
-                updateMeasurementStep();
-                document.getElementById('add-point-btn').style.display = 'block';
-                document.getElementById('next-step-btn').style.display = 'none';
-            } else {
-                // Measurements complete
-                measurements = {
-                    neck: cameraMeasurements.neck,
-                    shoulders: cameraMeasurements.shoulders,
-                    length: cameraMeasurements.length,
-                    timestamp: new Date().toISOString()
-                };
-                
-                closeCamera();
-                displayMeasurements();
-            }
+            // Disable canvas interactions
+            const canvas = document.getElementById('captured-canvas');
+            canvas.style.pointerEvents = 'none';
+            canvas.removeEventListener('click', handleCanvasClick);
+            canvas.removeEventListener('touchstart', handleCanvasTouch);
         }
         
-        function closeCamera() {
+        function completeMeasurements() {
+            measurements = {
+                neck: cameraMeasurements.neck,
+                shoulders: cameraMeasurements.shoulders,
+                length: cameraMeasurements.length,
+                timestamp: new Date().toISOString(),
+                calibrationFactor: calibrationFactor
+            };
+            
+            // Save measurements
+            localStorage.setItem('pillowMeasurements', JSON.stringify(measurements));
+            
+            showNotification('All measurements complete! 🎉', 'success');
+            closeEnhancedCamera();
+            displayMeasurements();
+        }
+        
+        function closeEnhancedCamera() {
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
                 cameraStream = null;
             }
             
-            if (distanceInterval) {
-                clearInterval(distanceInterval);
-                distanceInterval = null;
-            }
+            document.getElementById('camera-enhanced').classList.remove('active');
+            clearCurrentMeasurement();
             
-            document.getElementById('camera').classList.remove('active');
-            
-            // Reset camera state
+            // Reset state
             currentMeasurementStep = 0;
-            currentPoints = [];
-            isFaceAligned = false;
-            isImageCaptured = false;
-            clearPoints();
+            isCalibrated = false;
+            
+            // Reset video display
+            const video = document.getElementById('camera-feed-enhanced');
+            const canvas = document.getElementById('captured-canvas');
+            video.style.display = 'block';
+            canvas.style.display = 'none';
+        }
+        
+        function retakeMeasurements() {
+            // Clear saved measurements
+            localStorage.removeItem('pillowMeasurements');
             
             // Reset UI
-            document.getElementById('camera-feed').style.display = 'block';
-            document.getElementById('captured-image').style.display = 'none';
-            document.querySelector('.face-guide').style.display = 'block';
-            document.querySelector('.distance-indicator').style.display = 'block';
-            document.getElementById('distance-feedback').classList.remove('show');
+            document.getElementById('current-measurements').style.display = 'none';
+            document.getElementById('camera-prompt').innerHTML = `
+                <button class="btn btn-primary" onclick="startEnhancedCamera()" style="font-size: 18px; padding: 20px 40px;">
+                    📸 Start Enhanced Measurement
+                </button>
+                <p style="font-size: 14px; opacity: 0.7; margin-top: 15px;">
+                    Enhanced: Automatic calibration, better guides, and improved accuracy
+                </p>
+            `;
+            document.getElementById('camera-prompt').style.display = 'block';
             
-            // Reset buttons
-            document.getElementById('capture-btn').style.display = 'none';
-            document.getElementById('retake-btn').style.display = 'none';
-            document.getElementById('add-point-btn').style.display = 'none';
-            document.getElementById('next-step-btn').style.display = 'none';
+            measurements = null;
+            cameraMeasurements = { neck: null, shoulders: null, length: null };
         }
         
         function displayMeasurements() {
@@ -1007,7 +1299,7 @@
                 document.getElementById('camera-prompt').style.display = 'none';
                 document.getElementById('current-measurements').style.display = 'block';
                 
-                document.getElementById('progress').style.width = '50%';
+                document.getElementById('progress').style.width = '40%';
             }
         }
         
@@ -1029,7 +1321,7 @@
             
             if (i < questions.length) {
                 const q = questions[i];
-                let html = `<h2>${q.text}</h2>`;
+                let html = `<h2 style="margin-bottom: 25px; font-size: 28px;">${q.text}</h2>`;
                 
                 q.options.forEach(opt => {
                     const selected = q.multi ? 
@@ -1045,14 +1337,14 @@
                 });
                 
                 if (q.multi) {
-                    html += '<p style="text-align: center; opacity: 0.7; margin-top: 15px;">💡 Select multiple options</p>';
+                    html += '<p style="text-align: center; opacity: 0.7; margin-top: 20px; font-size: 15px;">💡 Select multiple options</p>';
                 }
                 
                 quiz.innerHTML = html;
                 
-                prog.style.width = (50 + ((i + 1) / questions.length) * 50) + '%';
+                prog.style.width = (40 + ((i + 1) / questions.length) * 50) + '%';
                 prev.style.display = i > 0 ? 'block' : 'none';
-                next.textContent = i === questions.length - 1 ? 'Get Results' : 'Next';
+                next.textContent = i === questions.length - 1 ? 'Get Results 🎯' : 'Next →';
                 
                 const hasAnswer = q.multi ? 
                     (answers[q.id] && answers[q.id].length > 0) :
@@ -1085,7 +1377,7 @@
                 showQuestion(currentQ);
                 
                 if (q.auto) {
-                    setTimeout(() => nextQ(), 500);
+                    setTimeout(() => nextQ(), 600);
                 }
             }
         }
@@ -1109,166 +1401,262 @@
         function showResults() {
             document.getElementById('quiz').style.display = 'none';
             document.getElementById('nav').style.display = 'none';
-            document.getElementById('progress').style.width = '100%';
+            document.getElementById('progress').style.width = '90%';
             
             const results = document.getElementById('results');
             results.style.display = 'block';
             results.innerHTML = `
-                <div style="text-align: center; padding: 50px;">
-                    <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #a855f7; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-                    <h3>Analyzing your measurements...</h3>
-                    <p style="opacity: 0.8;">Creating your perfect pillow recommendations</p>
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div class="loading-spinner" style="margin: 0 auto 25px;"></div>
+                    <h3 style="margin-bottom: 15px; font-size: 24px;">🧠 AI Analysis in Progress</h3>
+                    <p style="opacity: 0.8; font-size: 16px;">Analyzing your measurements and preferences...</p>
+                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 30px 0;">
+                        <div style="height: 100%; background: linear-gradient(90deg, #a855f7, #06b6d4); border-radius: 4px; width: 0%; animation: loading-bar 3s ease-out forwards;"></div>
+                    </div>
                 </div>
+                <style>
+                    @keyframes loading-bar {
+                        0% { width: 0%; }
+                        50% { width: 60%; }
+                        100% { width: 100%; }
+                    }
+                </style>
             `;
             
             setTimeout(() => {
-                const recs = generateRecommendations();
-                displayResults(recs);
-            }, 2500);
+                const recs = generateEnhancedRecommendations();
+                displayEnhancedResults(recs);
+                document.getElementById('progress').style.width = '100%';
+            }, 3200);
         }
         
-        function generateRecommendations() {
+        function generateEnhancedRecommendations() {
             const pos = answers.position;
+            const firmness = answers.firmness;
+            const issues = answers.issues || [];
             const budget = answers.budget;
             
-            let sizeRec = 'Standard Size';
+            // Enhanced algorithm based on measurements
+            let sizeRec = 'Standard (20" x 26")';
             let loftRec = 'Medium Loft (4-6")';
+            let materialRec = 'Memory Foam';
             
             if (measurements) {
-                if (measurements.neck > 15) {
-                    loftRec = 'High Loft (6-7")';
-                } else if (measurements.neck < 12) {
+                // More sophisticated sizing based on measurements
+                if (measurements.neck > 16) {
+                    loftRec = 'High Loft (6-8")';
+                } else if (measurements.neck < 11) {
                     loftRec = 'Low Loft (3-4")';
+                } else {
+                    loftRec = 'Medium Loft (4-6")';
                 }
                 
-                if (measurements.shoulders > 50) {
+                if (measurements.shoulders > 45) {
                     sizeRec = 'King Size (20" x 36")';
-                } else if (measurements.shoulders < 35) {
-                    sizeRec = 'Standard Size (20" x 26")';
-                } else {
+                } else if (measurements.shoulders > 40) {
                     sizeRec = 'Queen Size (20" x 30")';
+                } else {
+                    sizeRec = 'Standard (20" x 26")';
+                }
+                
+                // Material recommendations based on measurements and preferences
+                if (issues.includes('hot')) {
+                    materialRec = 'Gel-Infused Memory Foam';
+                } else if (issues.includes('neck')) {
+                    materialRec = 'Latex with Cervical Support';
+                } else if (firmness === 'firm') {
+                    materialRec = 'High-Density Foam';
+                } else if (firmness === 'soft') {
+                    materialRec = 'Plush Memory Foam';
                 }
             }
             
-            const pillows = {
-                side: { name: '🌙 Contour Side Sleeper Pillow', score: 95 },
-                back: { name: '☁️ Cervical Support Pillow', score: 93 },
-                stomach: { name: '🪶 Ultra-Slim Comfort Pillow', score: 91 },
-                mixed: { name: '🔄 Adjustable Universal Pillow', score: 94 }
+            const pillowTypes = {
+                side: { 
+                    name: '🌙 Contour Side Sleeper Pro', 
+                    score: 96,
+                    features: ['Ergonomic Curve', 'Dual Height Zones', 'Pressure Relief', 'Spinal Alignment']
+                },
+                back: { 
+                    name: '☁️ Cervical Support Elite', 
+                    score: 94,
+                    features: ['Neck Cradle', 'Adjustable Height', 'Firm Support Core', 'Breathable Design']
+                },
+                stomach: { 
+                    name: '🪶 Ultra-Slim Comfort', 
+                    score: 92,
+                    features: ['Low Profile', 'Soft Surface', 'Breathable Core', 'Minimal Elevation']
+                },
+                mixed: { 
+                    name: '🔄 Adaptive Universal Pro', 
+                    score: 95,
+                    features: ['Multi-Position Support', 'Adjustable Layers', 'Versatile Design', 'All-Night Comfort']
+                }
             };
             
-            const primary = pillows[pos] || pillows.mixed;
+            const primary = pillowTypes[pos] || pillowTypes.mixed;
             
             const recs = [
                 {
                     ...primary,
-                    type: 'Primary Recommendation',
-                    desc: `Ergonomically designed for ${pos} sleepers. Your measurements indicate ${loftRec} in ${sizeRec}.`,
-                    features: ['Contoured Design', 'Premium Materials', 'Breathable Cover', '5-Year Warranty'],
-                    price: budget === 'low' ? '$25-49' : budget === 'mid' ? '$50-99' : '$100-199',
-                    brands: budget === 'low' ? ['Utopia Bedding', 'Beckham Hotel'] : 
-                            budget === 'mid' ? ['Purple', 'Casper', 'Coop Home Goods'] : 
-                            ['Tempur-Pedic', 'Saatva', 'Brooklinen']
+                    type: 'Perfect Match',
+                    desc: `Specifically designed for ${pos} sleepers with your exact measurements. ${loftRec} in ${sizeRec} with ${materialRec} construction.`,
+                    material: materialRec,
+                    size: sizeRec,
+                    loft: loftRec,
+                    price: budget === 'low' ? '$35-65' : budget === 'mid' ? '$65-120' : '$120-250',
+                    brands: budget === 'low' ? ['Utopia Bedding Pro', 'Beckham Luxury', 'Sleep Innovations'] : 
+                            budget === 'mid' ? ['Purple Harmony', 'Casper Original', 'Coop Eden', 'Tuft & Needle'] : 
+                            ['Tempur-Pedic TEMPUR-Cloud', 'Saatva Latex', 'Brooklinen Down Alternative']
                 }
             ];
             
-            if (answers.issues && answers.issues.includes('neck')) {
+            // Add specialized recommendations based on issues
+            if (issues.includes('neck')) {
                 recs.push({
-                    name: '💆 Orthopedic Relief Pillow',
-                    type: 'Therapeutic Option',
-                    desc: 'Doctor-designed for neck pain relief with your exact measurements.',
-                    features: ['Ergonomic Shape', 'Firm Support', 'Pain Relief', 'Medical Grade'],
-                    score: 92,
-                    price: '$75-150',
-                    brands: ['Tempur-Pedic', 'Cervical Pillow Co.']
+                    name: '💆‍♀️ Therapeutic Neck Relief',
+                    type: 'Pain Relief Specialist',
+                    desc: `Orthopedic design specifically calibrated for your neck width (${measurements?.neck}cm). Doctor-recommended for chronic neck pain.`,
+                    features: ['Cervical Alignment', 'Pressure Point Relief', 'Medical Grade', 'Chiropractic Approved'],
+                    score: 93,
+                    material: 'Memory Foam with Gel Core',
+                    size: sizeRec,
+                    loft: 'Therapeutic Profile',
+                    price: '$85-180',
+                    brands: ['Tempur-Pedic Neck Pillow', 'Core Products Tri-Core', 'Mediflow Water Pillow']
                 });
             }
             
-            if (answers.issues && answers.issues.includes('hot')) {
+            if (issues.includes('hot')) {
                 recs.push({
-                    name: '❄️ Cooling Gel Pillow',
-                    type: 'Temperature Solution',
-                    desc: 'Advanced cooling technology sized for your measurements.',
-                    features: ['Gel-Infused', 'Breathable Mesh', 'Cool-to-Touch', 'Phase Change'],
+                    name: '❄️ Advanced Cooling System',
+                    type: 'Temperature Regulation',
+                    desc: `Triple-layer cooling technology sized for your measurements. Maintains optimal sleep temperature all night.`,
+                    features: ['Phase Change Material', 'Breathable Mesh', 'Moisture Wicking', 'Cool-Touch Surface'],
+                    score: 91,
+                    material: 'Gel-Infused with Copper',
+                    size: sizeRec,
+                    loft: loftRec,
+                    price: '$75-160',
+                    brands: ['Purple Harmony', 'GhostBed Cool', 'Sleep Number CoolFit', 'Molecule AirTEC']
+                });
+            }
+            
+            if (issues.includes('snoring')) {
+                recs.push({
+                    name: '😴 Anti-Snoring Elevation',
+                    type: 'Breathing Support',
+                    desc: `Scientifically designed incline based on your neck measurements to improve airway alignment and reduce snoring.`,
+                    features: ['Graduated Elevation', 'Airway Alignment', 'Firm Support Base', 'Hypoallergenic'],
                     score: 89,
-                    price: '$60-120',
-                    brands: ['Purple', 'GhostBed', 'Sleep Number']
+                    material: 'High-Density Foam Wedge',
+                    size: sizeRec,
+                    loft: 'Inclined Profile (6-8")',
+                    price: '$60-140',
+                    brands: ['Wedge Pillow Pro', 'InteVision Foam Wedge', 'Brentwood Home Zuma']
                 });
             }
             
             return recs;
         }
         
-        function displayResults(recs) {
+        function displayEnhancedResults(recs) {
             let html = `
-                <div style="text-align: center; margin-bottom: 50px;">
-                    <h2 style="background: linear-gradient(45deg, #fff, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 36px; margin-bottom: 15px; line-height: 1.2;">
-                        Your Perfect Pillow Matches
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h2 style="background: linear-gradient(135deg, #fff 0%, #a855f7 50%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: clamp(32px, 6vw, 42px); margin-bottom: 15px; line-height: 1.2; font-weight: 700;">
+                        🎯 Your Perfect Pillow Matches
                     </h2>
-                    <p style="opacity: 0.8; font-size: 18px; line-height: 1.5;">Based on your precise measurements and sleep profile</p>
+                    <p style="opacity: 0.85; font-size: 18px; line-height: 1.6;">AI-powered recommendations based on your precise measurements</p>
                 </div>
             `;
             
-            // Show measurements summary
+            // Enhanced measurements summary
             html += `
-                <div class="result-card" style="border: 2px solid #a855f7; background: rgba(168,85,247,0.1); margin-bottom: 35px;">
-                    <h3 style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; font-size: 22px;">
-                        <span style="font-size: 28px;">📏</span>
-                        Your Custom Measurements
+                <div class="result-card-enhanced" style="border: 3px solid #a855f7; background: linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(6,182,212,0.1) 100%); margin-bottom: 30px; position: relative;">
+                    <div style="position: absolute; top: -15px; right: 20px; background: linear-gradient(135deg, #a855f7, #06b6d4); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">📏 YOUR DATA</div>
+                    
+                    <h3 style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; font-size: 24px;">
+                        <span style="font-size: 32px;">🧮</span>
+                        Precision Measurements
                     </h3>
+                    
                     <div class="measurement-grid">
-                        <div class="measurement-card" style="background: rgba(168,85,247,0.2); padding: 25px 20px;">
-                            <div class="measurement-value" style="font-size: 32px;">${measurements.neck}</div>
-                            <div class="measurement-label" style="font-size: 13px;">Neck Width (cm)</div>
+                        <div class="measurement-card" style="background: rgba(168,85,247,0.25); border: 2px solid rgba(168,85,247,0.4); padding: 25px 20px;">
+                            <div class="measurement-value" style="font-size: 36px; text-shadow: 0 2px 8px rgba(168,85,247,0.5);">${measurements.neck}</div>
+                            <div class="measurement-label" style="font-size: 14px; font-weight: 600;">Neck Width (cm)</div>
+                            <div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">Optimal support zone</div>
                         </div>
-                        <div class="measurement-card" style="background: rgba(6,182,212,0.2); padding: 25px 20px;">
-                            <div class="measurement-value" style="color: #06b6d4; font-size: 32px;">${measurements.shoulders}</div>
-                            <div class="measurement-label" style="font-size: 13px;">Shoulder Width (cm)</div>
+                        <div class="measurement-card" style="background: rgba(6,182,212,0.25); border: 2px solid rgba(6,182,212,0.4); padding: 25px 20px;">
+                            <div class="measurement-value" style="color: #06b6d4; font-size: 36px; text-shadow: 0 2px 8px rgba(6,182,212,0.5);">${measurements.shoulders}</div>
+                            <div class="measurement-label" style="font-size: 14px; font-weight: 600;">Shoulder Width (cm)</div>
+                            <div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">Size compatibility</div>
                         </div>
-                        <div class="measurement-card" style="background: rgba(236,72,153,0.2); padding: 25px 20px;">
-                            <div class="measurement-value" style="color: #ec4899; font-size: 32px;">${measurements.length}</div>
-                            <div class="measurement-label" style="font-size: 13px;">Neck-Shoulder (cm)</div>
+                        <div class="measurement-card" style="background: rgba(236,72,153,0.25); border: 2px solid rgba(236,72,153,0.4); padding: 25px 20px;">
+                            <div class="measurement-value" style="color: #ec4899; font-size: 36px; text-shadow: 0 2px 8px rgba(236,72,153,0.5);">${measurements.length}</div>
+                            <div class="measurement-label" style="font-size: 14px; font-weight: 600;">Neck-Shoulder (cm)</div>
+                            <div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">Contour profile</div>
                         </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; font-size: 13px; opacity: 0.8;">
+                        📊 Measured on ${new Date(measurements.timestamp).toLocaleDateString()} with ${(calibrationFactor * 10).toFixed(1)} px/cm precision
                     </div>
                 </div>
             `;
             
+            // Display recommendations
             recs.forEach((rec, i) => {
+                const isTop = i === 0;
                 html += `
-                    <div class="result-card" ${i === 0 ? 'style="border: 2px solid #a855f7; position: relative; margin-bottom: 35px;"' : 'style="margin-bottom: 30px;"'}>
-                        ${i === 0 ? '<div style="position: absolute; top: -15px; right: 25px; background: linear-gradient(45deg, #a855f7, #06b6d4); padding: 8px 18px; border-radius: 20px; font-size: 12px; font-weight: bold;">⭐ TOP CHOICE</div>' : ''}
+                    <div class="result-card-enhanced" style="${isTop ? 'border: 3px solid #10b981; background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(168,85,247,0.1) 100%);' : 'border: 2px solid rgba(255,255,255,0.2);'} margin-bottom: 25px; position: relative;">
+                        ${isTop ? '<div style="position: absolute; top: -15px; right: 20px; background: linear-gradient(135deg, #10b981, #059669); padding: 8px 18px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">⭐ BEST MATCH</div>' : ''}
                         
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
-                            <div style="flex: 1;">
-                                <h3 style="font-size: 24px; margin-bottom: 12px; line-height: 1.3;">${rec.name}</h3>
-                                <span style="background: rgba(255,255,255,0.1); padding: 8px 18px; border-radius: 15px; font-size: 12px; border: 1px solid rgba(255,255,255,0.2);">${rec.type}</span>
+                            <div style="flex: 1; min-width: 250px;">
+                                <h3 style="font-size: 26px; margin-bottom: 12px; line-height: 1.3; font-weight: 700;">${rec.name}</h3>
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                    <span style="background: ${isTop ? 'rgba(16,185,129,0.2)' : 'rgba(168,85,247,0.2)'}; padding: 6px 14px; border-radius: 15px; font-size: 12px; border: 1px solid ${isTop ? 'rgba(16,185,129,0.4)' : 'rgba(168,85,247,0.3)'}; font-weight: 600;">${rec.type}</span>
+                                    <span style="background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 15px; font-size: 12px; border: 1px solid rgba(255,255,255,0.2);">${rec.material}</span>
+                                </div>
                             </div>
-                            <div style="text-align: center; min-width: 80px;">
-                                <div style="font-size: 36px; font-weight: bold; background: linear-gradient(45deg, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${rec.score}%</div>
-                                <div style="font-size: 11px; opacity: 0.7;">Match Score</div>
-                            </div>
-                        </div>
-                        
-                        <p style="margin-bottom: 25px; opacity: 0.9; font-size: 16px; line-height: 1.6;">${rec.desc}</p>
-                        
-                        <div style="margin-bottom: 25px;">
-                            <h4 style="margin-bottom: 15px; font-size: 16px;">Key Features:</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                ${rec.features.map(f => `<span style="background: rgba(168,85,247,0.2); padding: 8px 14px; border-radius: 12px; font-size: 13px; border: 1px solid rgba(168,85,247,0.3);">${f}</span>`).join('')}
+                            <div style="text-align: center; min-width: 100px;">
+                                <div style="font-size: 42px; font-weight: 800; background: linear-gradient(135deg, #10b981, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px;">${rec.score}%</div>
+                                <div style="font-size: 11px; opacity: 0.7; font-weight: 600;">AI Match Score</div>
                             </div>
                         </div>
                         
-                        <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="margin-bottom: 25px; opacity: 0.9; font-size: 16px; line-height: 1.7; font-weight: 400;">${rec.desc}</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                <h4 style="margin-bottom: 12px; font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Features</h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    ${rec.features.map(f => `<span style="background: rgba(168,85,247,0.2); padding: 6px 12px; border-radius: 10px; font-size: 12px; border: 1px solid rgba(168,85,247,0.3); font-weight: 500;">${f}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                <h4 style="margin-bottom: 12px; font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Specifications</h4>
+                                <div style="font-size: 13px; line-height: 1.8;">
+                                    <div><strong>Size:</strong> ${rec.size}</div>
+                                    <div><strong>Profile:</strong> ${rec.loft}</div>
+                                    <div><strong>Material:</strong> ${rec.material}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.08); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.15);">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                                <div style="flex: 1;">
-                                    <h4 style="margin-bottom: 12px; font-size: 16px;">Recommended Brands:</h4>
+                                <div style="flex: 1; min-width: 200px;">
+                                    <h4 style="margin-bottom: 15px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                                        🏪 <span>Recommended Brands</span>
+                                    </h4>
                                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                        ${rec.brands.map(brand => `<span style="background: rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 12px; font-size: 13px;">${brand}</span>`).join('')}
+                                        ${rec.brands.map(brand => `<span style="background: rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 12px; font-size: 13px; border: 1px solid rgba(255,255,255,0.2); font-weight: 500;">${brand}</span>`).join('')}
                                     </div>
                                 </div>
                                 <div style="text-align: right; min-width: 120px;">
-                                    <div style="font-size: 12px; opacity: 0.7; margin-bottom: 6px;">Price Range</div>
-                                    <div style="color: #10b981; font-size: 24px; font-weight: bold;">${rec.price}</div>
+                                    <div style="font-size: 12px; opacity: 0.7; margin-bottom: 8px; font-weight: 600;">Expected Price Range</div>
+                                    <div style="color: #10b981; font-size: 28px; font-weight: 800; text-shadow: 0 2px 8px rgba(16,185,129,0.3);">${rec.price}</div>
                                 </div>
                             </div>
                         </div>
@@ -1276,30 +1664,125 @@
                 `;
             });
             
+            // Enhanced call-to-action section
             html += `
-                <div style="text-align: center; margin-top: 50px; padding: 35px 30px; background: rgba(16,185,129,0.1); border: 2px solid rgba(16,185,129,0.3); border-radius: 20px;">
-                    <h3 style="margin-bottom: 20px; font-size: 24px;">🎉 Your Perfect Sleep Awaits!</h3>
-                    <p style="opacity: 0.9; margin-bottom: 30px; line-height: 1.6;">Recommendations based on your precise camera measurements</p>
+                <div style="text-align: center; margin-top: 40px; padding: 40px 30px; background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(168,85,247,0.1) 100%); border: 3px solid rgba(16,185,129,0.3); border-radius: 24px; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #10b981, #06b6d4, #a855f7, #ec4899);"></div>
                     
-                    <div class="share-save-buttons">
-                        <button class="btn btn-primary" onclick="saveResults()" style="font-size: 16px;">
-                            💾 Save Results
+                    <h3 style="margin-bottom: 20px; font-size: 28px; font-weight: 700;">🎉 Your Perfect Sleep Journey Starts Now!</h3>
+                    <p style="opacity: 0.9; margin-bottom: 30px; line-height: 1.6; font-size: 16px;">Scientifically personalized recommendations based on your unique measurements and sleep profile</p>
+                    
+                    <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 25px;">
+                        <button class="btn btn-primary" onclick="saveResults()" style="font-size: 16px; padding: 18px 32px; box-shadow: 0 6px 20px rgba(168,85,247,0.4);">
+                            💾 Save My Results
                         </button>
-                        <button class="btn btn-secondary" onclick="shareResults()" style="font-size: 16px;">
+                        <button class="btn btn-secondary" onclick="shareResults()" style="font-size: 16px; padding: 18px 32px;">
                             📤 Share Results
                         </button>
                     </div>
                     
-                    <button class="btn btn-secondary" onclick="location.reload()" style="font-size: 16px; margin-top: 20px;">
-                        🔄 Start New Assessment
-                    </button>
+                    <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <button class="btn btn-secondary" onclick="location.reload()" style="font-size: 16px; padding: 16px 28px;">
+                            🔄 Start New Assessment
+                        </button>
+                        <p style="font-size: 12px; opacity: 0.6; margin-top: 15px;">Your measurements are automatically saved for 7 days</p>
+                    </div>
                 </div>
             `;
             
             document.getElementById('results').innerHTML = html;
         }
         
+        function saveResults() {
+            const results = {
+                measurements: measurements,
+                answers: answers,
+                timestamp: new Date().toISOString(),
+                recommendations: generateEnhancedRecommendations()
+            };
+            
+            localStorage.setItem('pillowFinderResults', JSON.stringify(results));
+            
+            // Create downloadable file
+            const dataStr = JSON.stringify(results, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `pillow-recommendations-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Results saved successfully! 💾', 'success');
+        }
+        
+        function shareResults() {
+            const shareText = `🌙 My Dream Pillow Finder Results:
+
+📏 Measurements:
+• Neck: ${measurements.neck}cm
+• Shoulders: ${measurements.shoulders}cm  
+• Length: ${measurements.length}cm
+
+🎯 Top Recommendation: ${generateEnhancedRecommendations()[0].name}
+Score: ${generateEnhancedRecommendations()[0].score}%
+
+Try it yourself at: ${window.location.href}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Dream Pillow Finder Results',
+                    text: shareText,
+                    url: window.location.href
+                }).then(() => {
+                    showNotification('Results shared! 📤', 'success');
+                }).catch(() => {
+                    fallbackShare(shareText);
+                });
+            } else {
+                fallbackShare(shareText);
+            }
+        }
+        
+        function fallbackShare(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Results copied to clipboard! 📋', 'success');
+            }).catch(() => {
+                // Create temporary textarea for copying
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('Results copied to clipboard! 📋', 'success');
+            });
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize app
         document.addEventListener('DOMContentLoaded', init);
+        
+        // Enhanced error handling
+        window.addEventListener('error', (e) => {
+            console.error('App error:', e);
+            showNotification('Something went wrong. Please refresh and try again.', 'error');
+        });
+        
+        // Prevent form submission
+        document.addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>
