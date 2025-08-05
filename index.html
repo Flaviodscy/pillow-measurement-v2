@@ -1,1333 +1,778 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Star, MessageCircle, Filter, Heart, ShoppingCart, Zap, Award, CheckCircle, AlertCircle, RefreshCw, Send, User, Bot, X, Menu, ChevronRight, ExternalLink, Camera, Upload, Mic, MicOff } from 'lucide-react';
-
-const DreamPillowFinderPro = () => {
-  const [currentStep, setCurrentStep] = useState('measurement'); // measurement, quiz, chat, results, browse
-  const [measurements, setMeasurements] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, type: 'bot', content: 'Hi! I\'m your AI pillow expert. I can help you understand your pillow needs better. What would you like to know?' }
-  ]);
-  const [chatInput, setChatInput] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
-  const [pillows, setPillows] = useState([]);
-  const [favorites, setFavorites] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState({
-    sleepPosition: [],
-    material: [],
-    firmness: [],
-    priceRange: [0, 500],
-    brand: []
-  });
-  const [showCamera, setShowCamera] = useState(false);
-  const [cameraStep, setCameraStep] = useState(0);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [notificationType, setNotificationType] = useState('info');
-  const [isListening, setIsListening] = useState(false);
-  const chatEndRef = useRef(null);
-  const videoRef = useRef(null);
-
-  // Enhanced Questions with AI chat options
-  const questions = [
-    {
-      id: 'position',
-      text: 'What\'s your primary sleeping position?',
-      type: 'single',
-      options: [
-        { val: 'side', text: '🤱 Side Sleeper', desc: 'Sleep on my side most nights' },
-        { val: 'back', text: '😴 Back Sleeper', desc: 'Sleep on my back facing up' },
-        { val: 'stomach', text: '🛌 Stomach Sleeper', desc: 'Sleep face down' },
-        { val: 'mixed', text: '🔄 Combination', desc: 'Change positions during night' }
-      ],
-      aiOptions: [
-        "I'm a side sleeper",
-        "I sleep on my back",
-        "I sleep on my stomach", 
-        "I change positions often",
-        "I'm not sure about my sleeping position"
-      ]
-    },
-    {
-      id: 'firmness',
-      text: 'What firmness do you prefer?',
-      type: 'single',
-      options: [
-        { val: 'soft', text: '☁️ Soft', desc: 'Like sleeping on a cloud' },
-        { val: 'medium', text: '⚖️ Medium', desc: 'Balanced support and comfort' },
-        { val: 'firm', text: '💪 Firm', desc: 'Strong support, minimal sink' }
-      ],
-      aiOptions: [
-        "I prefer soft pillows",
-        "I like medium firmness",
-        "I need firm support",
-        "I'm not sure about firmness",
-        "My current pillow is too soft/firm"
-      ]
-    },
-    {
-      id: 'issues',
-      text: 'Any sleep issues? (Select all that apply)',
-      type: 'multiple',
-      options: [
-        { val: 'neck', text: '😣 Neck Pain', desc: 'Regular neck discomfort' },
-        { val: 'snoring', text: '😪 Snoring', desc: 'Breathing issues at night' },
-        { val: 'hot', text: '🥵 Sleep Hot', desc: 'Often feel too warm' },
-        { val: 'allergies', text: '🤧 Allergies', desc: 'Sensitive to materials' },
-        { val: 'none', text: '✨ None', desc: 'No specific issues' }
-      ],
-      aiOptions: [
-        "I have neck pain when I wake up",
-        "I snore or have breathing issues",
-        "I get too hot while sleeping",
-        "I have allergies",
-        "I don't have any specific issues",
-        "Tell me about common sleep problems"
-      ]
-    },
-    {
-      id: 'budget',
-      text: 'What\'s your budget?',
-      type: 'single',
-      options: [
-        { val: 'low', text: '💵 Under $50', desc: 'Best value options' },
-        { val: 'mid', text: '💰 $50-$100', desc: 'Quality balance' },
-        { val: 'high', text: '💎 $100+', desc: 'Premium options' }
-      ],
-      aiOptions: [
-        "I'm looking for budget-friendly options",
-        "I want good quality for reasonable price",
-        "I want the best, price isn't a concern",
-        "What's a good budget for a pillow?",
-        "Show me different price ranges"
-      ]
-    }
-  ];
-
-  // Production-ready pillow data with real API structure
-  const samplePillows = [
-    {
-      id: 1,
-      name: 'Purple Harmony Pillow',
-      brand: 'Purple',
-      price: 159,
-      originalPrice: 199,
-      rating: 4.6,
-      reviewCount: 2847,
-      image: 'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=400&h=300&fit=crop',
-      description: 'Revolutionary gel grid technology for cooling comfort',
-      features: ['Cooling gel grid', 'Height adjustable', 'Hypoallergenic', 'Machine washable cover'],
-      sleepPositions: ['side', 'back'],
-      material: 'gel',
-      firmness: 'medium-firm',
-      inStock: true,
-      shipping: 'Free 2-day shipping',
-      affiliate: true,
-      apiSource: 'amazon-pa-api'
-    },
-    {
-      id: 2,
-      name: 'TEMPUR-Cloud Pillow',
-      brand: 'Tempur-Pedic',
-      price: 129,
-      originalPrice: 159,
-      rating: 4.4,
-      reviewCount: 1923,
-      image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&h=300&fit=crop',
-      description: 'Adaptive TEMPUR material for personalized comfort',
-      features: ['TEMPUR material', 'Pressure relieving', 'Removable cover', '5-year warranty'],
-      sleepPositions: ['back', 'stomach'],
-      material: 'memory-foam',
-      firmness: 'soft',
-      inStock: true,
-      shipping: 'Free shipping',
-      affiliate: true,
-      apiSource: 'tempurpedic-api'
-    },
-    {
-      id: 3,
-      name: 'Pluto Custom Pillow',
-      brand: 'Pluto',
-      price: 95,
-      originalPrice: 125,
-      rating: 4.8,
-      reviewCount: 3421,
-      image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=400&h=300&fit=crop',
-      description: 'Personalized pillow built to your exact specifications',
-      features: ['Custom built', 'AI-matched', 'CertiPUR-US foam', '125-night trial'],
-      sleepPositions: ['side', 'back', 'stomach'],
-      material: 'hybrid',
-      firmness: 'custom',
-      inStock: true,
-      shipping: 'Free shipping & returns',
-      affiliate: true,
-      apiSource: 'pluto-api'
-    }
-  ];
-
-  useEffect(() => {
-    setPillows(samplePillows);
-    loadSavedData();
-  }, []);
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
-
-  const loadSavedData = () => {
-    const saved = localStorage.getItem('dreamPillowData');
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        if (data.measurements && Date.now() - new Date(data.timestamp).getTime() < 7 * 24 * 60 * 60 * 1000) {
-          setMeasurements(data.measurements);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Pillow Finder - Working Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
         }
-      } catch (e) {
-        console.log('Could not load saved data');
-      }
-    }
-  };
-
-  const notify = (message, type = 'info') => {
-    setNotificationMessage(message);
-    setNotificationType(type);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
-  };
-
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setShowCamera(true);
-      setCameraStep(0);
-      notify('Camera started! Follow the measurement steps', 'success');
-    } catch (err) {
-      notify('Camera access required for measurements', 'error');
-    }
-  };
-
-  const closeCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
-    }
-    setShowCamera(false);
-    setCameraStep(0);
-  };
-
-  const simulateMeasurement = () => {
-    // Simulate AI measurement processing
-    setTimeout(() => {
-      const mockMeasurements = {
-        neck: (12 + Math.random() * 6).toFixed(1),
-        shoulders: (38 + Math.random() * 12).toFixed(1),
-        length: (8 + Math.random() * 4).toFixed(1),
-        timestamp: new Date().toISOString()
-      };
-      setMeasurements(mockMeasurements);
-      localStorage.setItem('dreamPillowData', JSON.stringify({
-        measurements: mockMeasurements,
-        timestamp: new Date().toISOString()
-      }));
-      closeCamera();
-      notify('Measurements captured successfully! 🎉', 'success');
-    }, 2000);
-  };
-
-  const handleAnswer = (questionId, value) => {
-    const question = questions[currentQuestionIndex];
-    if (question.type === 'multiple') {
-      const currentAnswers = answers[questionId] || [];
-      if (value === 'none') {
-        setAnswers(prev => ({ ...prev, [questionId]: ['none'] }));
-      } else {
-        const newAnswers = currentAnswers.includes(value)
-          ? currentAnswers.filter(v => v !== value)
-          : [...currentAnswers.filter(v => v !== 'none'), value];
-        setAnswers(prev => ({ ...prev, [questionId]: newAnswers }));
-      }
-    } else {
-      setAnswers(prev => ({ ...prev, [questionId]: value }));
-      // Auto-advance for single choice questions
-      setTimeout(() => {
-        if (currentQuestionIndex < questions.length - 1) {
-          setCurrentQuestionIndex(prev => prev + 1);
-        } else {
-          setCurrentStep('results');
+        
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 50%, rgba(168,85,247,0.3) 0%, transparent 50%),
+                radial-gradient(circle at 75% 25%, rgba(6,182,212,0.3) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(236,72,153,0.2) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            z-index: -1;
         }
-      }, 600);
-    }
-  };
-
-  const handleChatSubmit = async () => {
-    if (!chatInput.trim()) return;
+        
+        @keyframes float {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .card {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a855f7 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7, #06b6d4);
+            transition: width 0.5s ease;
+            width: 20%;
+        }
+        
+        .step {
+            display: none;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            margin: 0.5rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7, #06b6d4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(168,85,247,0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168,85,247,0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-large {
+            padding: 1.5rem 3rem;
+            font-size: 1.2rem;
+        }
+        
+        /* Measurements */
+        .measurement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .measurement-card {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .measurement-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(168,85,247,0.3);
+        }
+        
+        .measurement-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .measurement-value.purple { color: #a855f7; }
+        .measurement-value.cyan { color: #06b6d4; }
+        .measurement-value.pink { color: #ec4899; }
+        
+        .measurement-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Quiz */
+        .question-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        
+        .option {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .option.selected {
+            background: rgba(168,85,247,0.3);
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168,85,247,0.3);
+        }
+        
+        .option-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .option-desc {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        /* Chat */
+        .chat-container {
+            background: rgba(0,0,0,0.4);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #a855f7, #06b6d4);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .chat-message {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .chat-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        
+        .chat-avatar.user { background: #a855f7; }
+        .chat-avatar.bot { background: #6b7280; }
+        
+        .chat-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .chat-bubble.user {
+            background: #a855f7;
+            color: white;
+        }
+        
+        .chat-bubble.bot {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .chat-options {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .chat-option {
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        
+        .chat-option:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .chat-input-area {
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .chat-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        /* Results */
+        .result-card {
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(168,85,247,0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .result-card.best {
+            border-color: rgba(16,185,129,0.5);
+            background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(168,85,247,0.1) 100%);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .result-score {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #10b981;
+        }
+        
+        .result-desc {
+            margin-bottom: 1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .feature {
+            background: rgba(168,85,247,0.2);
+            border: 1px solid rgba(168,85,247,0.3);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        
+        .question-info {
+            opacity: 0.7;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem 1.5rem;
+            background: rgba(16,185,129,0.9);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(300px);
+            transition: transform 0.3s;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: rgba(239,68,68,0.9);
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            .measurement-grid { grid-template-columns: 1fr; }
+            .result-header { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification" class="notification"></div>
     
-    const userMessage = { 
-      id: Date.now(), 
-      type: 'user', 
-      content: chatInput 
-    };
-    
-    setChatMessages(prev => [...prev, userMessage]);
-    const currentInput = chatInput;
-    setChatInput('');
-    setChatLoading(true);
-
-    try {
-      // Simulate AI response with production-ready logic
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const botResponse = {
-        id: Date.now() + 1,
-        type: 'bot',
-        content: generateAIResponse(currentInput),
-        options: generateResponseOptions(currentInput)
-      };
-      
-      setChatMessages(prev => [...prev, botResponse]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      notify('Chat service temporarily unavailable', 'error');
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const generateAIResponse = (input) => {
-    const lower = input.toLowerCase();
-    
-    if (lower.includes('side sleeper') || lower.includes('side')) {
-      return "For side sleepers, I recommend contour pillows that support your neck's natural curve. Based on your body measurements, you'll need proper height to fill the gap between your shoulder and neck. Key features to look for include ergonomic design, pressure relief, and materials that maintain their shape.";
-    } else if (lower.includes('hot') || lower.includes('warm') || lower.includes('cool')) {
-      return "If you sleep hot, cooling technology is essential! Look for gel-infused memory foam, breathable covers, or phase-change materials. Purple's gel grid technology and copper-infused foams are excellent for temperature regulation.";
-    } else if (lower.includes('neck pain') || lower.includes('pain')) {
-      return "Neck pain often indicates poor pillow support. You need a pillow that maintains your spine's natural alignment. Consider memory foam with cervical contouring, or adjustable pillows where you can customize the height and firmness.";
-    } else if (lower.includes('budget') || lower.includes('price') || lower.includes('cost')) {
-      return "Pillow prices vary widely! Budget options ($20-50) can be good for basic comfort. Mid-range ($50-120) offers better materials and durability. Premium ($120+) includes advanced technologies and longer warranties. Your sleep quality is worth the investment!";
-    } else if (lower.includes('material') || lower.includes('foam') || lower.includes('down')) {
-      return "Pillow materials each have unique benefits: Memory foam provides contouring support, latex offers bounce and cooling, down is soft and luxurious, and synthetic fills are hypoallergenic and affordable. Your sleep position and preferences determine the best choice.";
-    } else {
-      return "I'm here to help you find the perfect pillow! I can provide personalized recommendations based on your sleeping position, comfort preferences, and any specific needs like cooling or pain relief. What aspect of pillow selection would you like to explore?";
-    }
-  };
-
-  const generateResponseOptions = (input) => {
-    const lower = input.toLowerCase();
-    
-    if (lower.includes('side sleeper')) {
-      return [
-        "Tell me about contour pillows",
-        "What height do I need?",
-        "Best materials for side sleepers",
-        "Show me side sleeper pillows"
-      ];
-    } else if (lower.includes('hot')) {
-      return [
-        "Show me cooling pillows",
-        "What is gel grid technology?",
-        "Compare cooling materials",
-        "Best pillows for hot sleepers"
-      ];
-    } else if (lower.includes('pain')) {
-      return [
-        "Show therapeutic pillows",
-        "What causes neck pain?",
-        "Cervical support options",
-        "Orthopedic pillow recommendations"
-      ];
-    } else {
-      return [
-        "Help me find my sleeping position",
-        "What firmness do I need?",
-        "Show me pillow materials",
-        "I have specific sleep issues",
-        "What's my budget range?"
-      ];
-    }
-  };
-
-  const handleChatOption = (option) => {
-    setChatInput(option);
-    handleChatSubmit();
-  };
-
-  const startVoiceInput = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-      
-      recognition.onstart = () => {
-        setIsListening(true);
-        notify('Listening... Speak now!', 'info');
-      };
-      
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setChatInput(transcript);
-        setIsListening(false);
-      };
-      
-      recognition.onerror = () => {
-        setIsListening(false);
-        notify('Speech recognition error. Please try again.', 'error');
-      };
-      
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-      
-      recognition.start();
-    } else {
-      notify('Speech recognition not supported in this browser', 'error');
-    }
-  };
-
-  const generateResults = () => {
-    const pos = answers.position || 'mixed';
-    const firmness = answers.firmness || 'medium';
-    const issues = answers.issues || [];
-    const budget = answers.budget || 'mid';
-    
-    let recommendations = [];
-    
-    // Enhanced algorithm using measurements
-    if (measurements) {
-      const neckWidth = parseFloat(measurements.neck);
-      const shoulderWidth = parseFloat(measurements.shoulders);
-      
-      recommendations.push({
-        name: '🌙 AI-Matched Custom Pillow',
-        type: 'Perfect Match',
-        score: 96,
-        desc: `Scientifically designed for your exact measurements: ${measurements.neck}cm neck width, ${measurements.shoulders}cm shoulder width. Custom height and firmness for ${pos} sleepers.`,
-        features: ['Custom Height', 'Precision Fit', 'AI-Optimized', 'Made-to-Order'],
-        material: neckWidth > 14 ? 'High-Loft Memory Foam' : 'Medium-Loft Hybrid',
-        price: budget === 'low' ? '$45-75' : budget === 'mid' ? '$75-125' : '$125-250',
-        brands: ['Pluto Custom', 'Purple Harmony', 'Tempur-Pedic'],
-        reasons: [
-          `Neck width (${measurements.neck}cm) requires ${neckWidth > 14 ? 'high' : neckWidth < 11 ? 'low' : 'medium'} loft`,
-          `Shoulder width (${measurements.shoulders}cm) indicates ${shoulderWidth > 45 ? 'king' : shoulderWidth > 40 ? 'queen' : 'standard'} size`,
-          `${pos} sleeping position needs specific support profile`
-        ]
-      });
-    }
-    
-    // Add issue-specific recommendations
-    if (issues.includes('hot')) {
-      recommendations.push({
-        name: '❄️ Advanced Cooling System',
-        type: 'Temperature Control',
-        score: 94,
-        desc: 'Triple-layer cooling technology with gel grid, phase-change materials, and breathable mesh cover.',
-        features: ['Gel Grid Technology', 'Phase Change Materials', 'Breathable Mesh', 'Moisture Wicking'],
-        material: 'Gel-Infused Memory Foam',
-        price: '$89-179',
-        brands: ['Purple Harmony', 'Molecule AirTEC', 'Sleep Number CoolFit'],
-        reasons: ['Addresses overheating issues', 'Maintains cool temperature all night', 'Advanced cooling materials']
-      });
-    }
-    
-    if (issues.includes('neck')) {
-      recommendations.push({
-        name: '💆‍♀️ Therapeutic Neck Support',
-        type: 'Pain Relief',
-        score: 93,
-        desc: 'Orthopedic design with cervical contouring and pressure point relief for chronic neck pain.',
-        features: ['Cervical Contour', 'Pressure Relief', 'Medical Grade', 'Orthopedic Design'],
-        material: 'Memory Foam with Gel Core',
-        price: '$95-185',
-        brands: ['Tempur-Pedic Neck', 'Core Products Tri-Core', 'Mediflow Water'],
-        reasons: ['Designed for neck pain relief', 'Maintains spinal alignment', 'Doctor recommended']
-      });
-    }
-    
-    return recommendations;
-  };
-
-  const getProgressPercentage = () => {
-    if (currentStep === 'measurement') return measurements ? 25 : 10;
-    if (currentStep === 'quiz') return 25 + (currentQuestionIndex / questions.length) * 50;
-    if (currentStep === 'chat') return 75;
-    if (currentStep === 'results') return 100;
-    return 80;
-  };
-
-  const renderMeasurementStep = () => (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
-      </div>
-
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-6 leading-tight">
-            🌙 Dream Pillow Finder
-          </h1>
-          <p className="text-xl text-gray-300 leading-relaxed">
-            AI-powered measurements for your perfect sleep companion
-          </p>
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
         </div>
-
-        {/* Progress bar */}
-        <div className="w-full bg-gray-800 rounded-full h-3 mb-12 border border-gray-700">
-          <div 
-            className="bg-gradient-to-r from-purple-500 to-cyan-500 h-full rounded-full transition-all duration-700 relative overflow-hidden"
-            style={{ width: `${getProgressPercentage()}%` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
-          </div>
-        </div>
-
-        {/* Measurement Section */}
-        <div className="bg-black/40 backdrop-blur-xl rounded-3xl p-8 border border-purple-500/30 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 animate-pulse"></div>
-          
-          <div className="relative z-10">
-            <h3 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-3">
-              📸 <span>Enhanced Camera Measurements</span>
-            </h3>
-            <p className="text-gray-300 text-center mb-8 text-lg leading-relaxed">
-              Precision measurements with automatic calibration for the perfect pillow fit
-            </p>
-
-            {measurements ? (
-              <div className="space-y-6">
-                <h4 className="text-xl font-semibold text-green-400 text-center mb-6">
-                  ✓ Your Measurements:
-                </h4>
+        
+        <!-- Step 1: Measurement -->
+        <div id="step1" class="step active">
+            <div class="card">
+                <h1>🌙 Dream Pillow Finder</h1>
+                <p class="subtitle">AI-powered recommendations for your perfect sleep</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
-                    { label: 'Neck Width (cm)', value: measurements.neck, color: 'from-purple-500 to-purple-600' },
-                    { label: 'Shoulder Width (cm)', value: measurements.shoulders, color: 'from-cyan-500 to-cyan-600' },
-                    { label: 'Neck-Shoulder (cm)', value: measurements.length, color: 'from-pink-500 to-pink-600' }
-                  ].map((item, i) => (
-                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                      <div className={`text-4xl font-bold bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-2`}>
-                        {item.value}
-                      </div>
-                      <div className="text-sm text-gray-300 font-medium">{item.label}</div>
+                <div id="measurementPrompt">
+                    <div style="text-align: center; margin: 3rem 0;">
+                        <h3 style="margin-bottom: 1rem;">📸 Get Your Measurements</h3>
+                        <p style="opacity: 0.8; margin-bottom: 2rem;">We'll simulate AI measurements for the perfect pillow fit</p>
+                        <button class="btn btn-primary btn-large" onclick="startMeasurement()">
+                            📸 Start Measurement
+                        </button>
                     </div>
-                  ))}
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-                  <button
-                    onClick={() => setCurrentStep('quiz')}
-                    className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:from-purple-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                  >
-                    Continue to Questions →
-                  </button>
-                  <button
-                    onClick={() => setMeasurements(null)}
-                    className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300"
-                  >
-                    📸 Retake Measurements
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center space-y-6">
-                <button
-                  onClick={startCamera}
-                  className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-12 py-6 rounded-2xl font-bold text-xl hover:from-purple-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 shadow-xl"
-                >
-                  📸 Start Enhanced Measurement
-                </button>
-                <p className="text-sm text-gray-400">
-                  New: Automatic calibration, better guides, and improved accuracy
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Camera Modal */}
-      {showCamera && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col">
-          <div className="bg-black/80 backdrop-blur-xl p-6 text-center border-b border-white/10">
-            <h3 className="text-2xl font-bold text-white mb-2">
-              Step {cameraStep + 1}: Camera Measurement
-            </h3>
-            <p className="text-gray-300">
-              {cameraStep === 0 && "Hold a credit card for size reference"}
-              {cameraStep === 1 && "Position your face in the guide"}
-              {cameraStep === 2 && "Measuring your dimensions..."}
-            </p>
-            <div className="flex justify-center gap-2 mt-4">
-              {[0, 1, 2].map(i => (
-                <div
-                  key={i}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    i === cameraStep ? 'bg-purple-500 scale-125' : 
-                    i < cameraStep ? 'bg-green-500' : 'bg-gray-600'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex-1 relative flex items-center justify-center">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="max-w-full max-h-full object-contain transform scale-x-[-1] rounded-lg"
-            />
-            
-            {/* Camera overlay guides */}
-            {cameraStep === 0 && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="border-4 border-dashed border-yellow-400 w-64 h-40 rounded-lg flex items-center justify-center bg-yellow-400/10">
-                  <span className="text-yellow-400 font-bold text-center">
-                    Hold Credit Card Here<br />
-                    <small>(85.6mm × 53.98mm)</small>
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {cameraStep === 1 && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="border-4 border-dashed border-white/60 w-64 h-80 rounded-full flex items-center justify-center">
-                  <span className="text-6xl opacity-30">👤</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-black/80 backdrop-blur-xl p-6 border-t border-white/10">
-            <div className="flex justify-center gap-6">
-              <button
-                onClick={closeCamera}
-                className="w-14 h-14 bg-red-500/20 border-2 border-red-500 text-red-400 rounded-full flex items-center justify-center hover:bg-red-500/30 transition-all"
-              >
-                <X className="h-6 w-6" />
-              </button>
-              
-              <button
-                onClick={simulateMeasurement}
-                className="w-20 h-20 bg-gradient-to-r from-purple-600 to-cyan-600 text-white rounded-full flex items-center justify-center hover:from-purple-700 hover:to-cyan-700 transition-all transform hover:scale-110 shadow-xl"
-              >
-                <Camera className="h-8 w-8" />
-              </button>
-              
-              {cameraStep > 0 && (
-                <button
-                  onClick={() => setCameraStep(prev => Math.min(prev + 1, 2))}
-                  className="w-14 h-14 bg-green-500/20 border-2 border-green-500 text-green-400 rounded-full flex items-center justify-center hover:bg-green-500/30 transition-all"
-                >
-                  <CheckCircle className="h-6 w-6" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderQuizStep = () => {
-    const currentQuestion = questions[currentQuestionIndex];
-    if (!currentQuestion) return null;
-
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-        </div>
-
-        <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
-          {/* Progress bar */}
-          <div className="w-full bg-gray-800 rounded-full h-3 mb-12 border border-gray-700">
-            <div 
-              className="bg-gradient-to-r from-purple-500 to-cyan-500 h-full rounded-full transition-all duration-700 relative overflow-hidden"
-              style={{ width: `${getProgressPercentage()}%` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
-            </div>
-          </div>
-
-          <div className="bg-black/40 backdrop-blur-xl rounded-3xl p-8 border border-purple-500/30 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 animate-pulse"></div>
-            
-            <div className="relative z-10">
-              <h2 className="text-4xl font-bold text-center mb-8 text-white leading-tight">
-                {currentQuestion.text}
-              </h2>
-
-              <div className="grid gap-4 mb-8">
-                {currentQuestion.options.map((option, index) => {
-                  const isSelected = currentQuestion.type === 'multiple' 
-                    ? (answers[currentQuestion.id] || []).includes(option.val)
-                    : answers[currentQuestion.id] === option.val;
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswer(currentQuestion.id, option.val)}
-                      className={`p-6 rounded-2xl border-2 transition-all duration-300 text-left hover:transform hover:scale-[1.02] ${
-                        isSelected 
-                          ? 'bg-purple-500/30 border-purple-400 shadow-lg shadow-purple-500/25' 
-                          : 'bg-white/10 border-white/20 hover:bg-white/15'
-                      }`}
-                    >
-                      <div className="text-xl font-bold text-white mb-2">{option.text}</div>
-                      <div className="text-gray-300 text-sm">{option.desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* AI Chat Options */}
-              <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-2xl p-6 border border-cyan-500/30">
-                <h3 className="text-lg font-semibold text-cyan-300 mb-4 flex items-center gap-2">
-                  <Bot className="h-5 w-5" />
-                  Need help deciding? Try these AI suggestions:
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {currentQuestion.aiOptions.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setCurrentStep('chat');
-                        setChatInput(option);
-                        setTimeout(() => handleChatSubmit(), 100);
-                      }}
-                      className="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm text-white border border-white/20 transition-all duration-200 text-left"
-                    >
-                      💬 "{option}"
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Navigation */}
-              <div className="flex justify-between items-center mt-8">
-                <button
-                  onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
-                  disabled={currentQuestionIndex === 0}
-                  className="px-6 py-3 bg-white/10 text-white rounded-xl font-medium border border-white/20 hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  ← Previous
-                </button>
-
-                <div className="text-white/60 text-sm">
-                  Question {currentQuestionIndex + 1} of {questions.length}
-                </div>
-
-                <button
-                  onClick={() => {
-                    if (currentQuestionIndex < questions.length - 1) {
-                      setCurrentQuestionIndex(prev => prev + 1);
-                    } else {
-                      setCurrentStep('results');
-                    }
-                  }}
-                  disabled={!answers[currentQuestion.id] || (currentQuestion.type === 'multiple' && (!answers[currentQuestion.id] || answers[currentQuestion.id].length === 0))}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-cyan-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {currentQuestionIndex === questions.length - 1 ? 'Get Results 🎯' : 'Next →'}
-                </button>
-              </div>
-
-              {currentQuestion.type === 'multiple' && (
-                <p className="text-center text-gray-400 text-sm mt-4">
-                  💡 Select multiple options that apply to you
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderChatStep = () => (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-      </div>
-
-      <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
-        <div className="bg-black/40 backdrop-blur-xl rounded-3xl overflow-hidden border border-purple-500/30">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-cyan-600 p-6 text-white">
-            <h2 className="text-3xl font-bold mb-2">🤖 AI Pillow Expert</h2>
-            <p className="opacity-90">Get personalized pillow recommendations and answers to your sleep questions</p>
-            
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => setCurrentStep('quiz')}
-                className="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition-all"
-              >
-                ← Back to Quiz
-              </button>
-              <button
-                onClick={() => setCurrentStep('browse')}
-                className="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition-all"
-              >
-                Browse Pillows →
-              </button>
-            </div>
-          </div>
-          
-          {/* Chat Messages */}
-          <div className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-900/50">
-            {chatMessages.map(message => (
-              <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`flex items-start space-x-3 max-w-md ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                    message.type === 'user' ? 'bg-purple-500' : 'bg-gray-600'
-                  }`}>
-                    {message.type === 'user' ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4 text-white" />}
-                  </div>
-                  <div className={`px-4 py-3 rounded-2xl ${
-                    message.type === 'user' 
-                      ? 'bg-purple-500 text-white' 
-                      : 'bg-white/10 text-white border border-white/20'
-                  }`}>
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                
+                <div id="measurementResults" style="display: none;">
+                    <h3 style="text-align: center; color: #10b981; margin-bottom: 1.5rem;">✓ Your Measurements</h3>
                     
-                    {/* Response options */}
-                    {message.options && (
-                      <div className="mt-3 space-y-2">
-                        {message.options.map((option, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleChatOption(option)}
-                            className="block w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs border border-white/20 transition-all"
-                          >
-                            💬 {option}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {chatLoading && (
-              <div className="flex justify-start">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="bg-white/10 px-4 py-3 rounded-2xl border border-white/20">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div ref={chatEndRef} />
-          </div>
-          
-          {/* Input */}
-          <div className="border-t border-white/10 p-4 bg-gray-900/30">
-            <div className="flex space-x-3">
-              <input
-                type="text"
-                placeholder="Ask about pillow recommendations, sleep positions, materials..."
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleChatSubmit()}
-                className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
-                disabled={chatLoading}
-              />
-              <button
-                onClick={startVoiceInput}
-                disabled={isListening}
-                className={`p-3 rounded-xl transition-all ${
-                  isListening 
-                    ? 'bg-red-500 text-white animate-pulse' 
-                    : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                }`}
-              >
-                {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-              </button>
-              <button
-                onClick={handleChatSubmit}
-                disabled={chatLoading || !chatInput.trim()}
-                className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-              >
-                <Send className="h-4 w-4" />
-                <span>Send</span>
-              </button>
-            </div>
-            
-            {/* Quick suggestions */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              {[
-                "What's my sleeping position?",
-                "I sleep too hot",
-                "I have neck pain",
-                "Show me cooling pillows",
-                "What's my budget range?"
-              ].map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleChatOption(suggestion)}
-                  className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white border border-white/20 transition-all"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderResultsStep = () => {
-    const recommendations = generateResults();
-    
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-        </div>
-
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
-          {/* Progress bar */}
-          <div className="w-full bg-gray-800 rounded-full h-3 mb-12 border border-gray-700">
-            <div className="bg-gradient-to-r from-purple-500 to-cyan-500 h-full rounded-full transition-all duration-700 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
-            </div>
-          </div>
-
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-6 leading-tight">
-              🎯 Your Perfect Pillow Matches
-            </h2>
-            <p className="text-xl text-gray-300 leading-relaxed">
-              AI-powered recommendations based on your precise measurements and preferences
-            </p>
-          </div>
-
-          {/* Measurements Summary */}
-          {measurements && (
-            <div className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 backdrop-blur-xl rounded-3xl p-8 border-2 border-purple-500/40 mb-12 relative overflow-hidden">
-              <div className="absolute top-4 right-6 bg-gradient-to-r from-purple-600 to-cyan-600 px-4 py-2 rounded-full text-sm font-bold">
-                📏 YOUR DATA
-              </div>
-              
-              <h3 className="text-3xl font-bold text-white mb-8 flex items-center gap-4">
-                <span className="text-4xl">🧮</span>
-                Precision Measurements
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { label: 'Neck Width (cm)', value: measurements.neck, color: 'from-purple-500 to-purple-600', desc: 'Optimal support zone' },
-                  { label: 'Shoulder Width (cm)', value: measurements.shoulders, color: 'from-cyan-500 to-cyan-600', desc: 'Size compatibility' },
-                  { label: 'Neck-Shoulder (cm)', value: measurements.length, color: 'from-pink-500 to-pink-600', desc: 'Contour profile' }
-                ].map((item, i) => (
-                  <div key={i} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-2 border-white/20 text-center hover:bg-white/15 transition-all">
-                    <div className={`text-5xl font-bold bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-2`}>
-                      {item.value}
-                    </div>
-                    <div className="text-lg font-semibold text-white mb-1">{item.label}</div>
-                    <div className="text-xs text-gray-400">{item.desc}</div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 p-4 bg-white/10 rounded-xl text-sm text-gray-300 text-center">
-                📊 Measured on {new Date(measurements.timestamp).toLocaleDateString()} with enhanced AI precision
-              </div>
-            </div>
-          )}
-
-          {/* Recommendations */}
-          <div className="space-y-8">
-            {recommendations.map((rec, index) => {
-              const isTop = index === 0;
-              return (
-                <div
-                  key={index}
-                  className={`backdrop-blur-xl rounded-3xl p-8 border-2 relative overflow-hidden ${
-                    isTop 
-                      ? 'bg-gradient-to-r from-green-500/20 to-purple-500/20 border-green-500/40' 
-                      : 'bg-black/40 border-purple-500/30'
-                  }`}
-                >
-                  {isTop && (
-                    <div className="absolute top-4 right-6 bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                      ⭐ BEST MATCH
-                    </div>
-                  )}
-                  
-                  <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-                    <div className="flex-1">
-                      <h3 className="text-3xl font-bold text-white mb-4 leading-tight">{rec.name}</h3>
-                      
-                      <div className="flex flex-wrap gap-3 mb-6">
-                        <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${
-                          isTop 
-                            ? 'bg-green-500/20 border-green-500/40 text-green-300' 
-                            : 'bg-purple-500/20 border-purple-500/40 text-purple-300'
-                        }`}>
-                          {rec.type}
-                        </span>
-                        <span className="px-4 py-2 bg-white/10 border-2 border-white/20 rounded-full text-sm text-white font-medium">
-                          {rec.material}
-                        </span>
-                      </div>
-                      
-                      <p className="text-gray-300 text-lg leading-relaxed mb-6">{rec.desc}</p>
-                      
-                      {rec.reasons && (
-                        <div className="mb-6">
-                          <h4 className="text-lg font-semibold text-white mb-3">🎯 Why this matches you:</h4>
-                          <ul className="space-y-2">
-                            {rec.reasons.map((reason, i) => (
-                              <li key={i} className="flex items-start gap-3 text-gray-300">
-                                <span className="text-green-400 mt-1">✓</span>
-                                <span>{reason}</span>
-                              </li>
-                            ))}
-                          </ul>
+                    <div class="measurement-grid">
+                        <div class="measurement-card">
+                            <div class="measurement-value purple" id="neckValue">-</div>
+                            <div class="measurement-label">Neck Width (cm)</div>
                         </div>
-                      )}
+                        <div class="measurement-card">
+                            <div class="measurement-value cyan" id="shoulderValue">-</div>
+                            <div class="measurement-label">Shoulder Width (cm)</div>
+                        </div>
+                        <div class="measurement-card">
+                            <div class="measurement-value pink" id="lengthValue">-</div>
+                            <div class="measurement-label">Neck-Shoulder (cm)</div>
+                        </div>
                     </div>
                     
-                    <div className="text-center lg:text-right min-w-[140px]">
-                      <div className="text-6xl font-bold bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-                        {rec.score}%
-                      </div>
-                      <div className="text-sm text-gray-400 font-semibold">AI Match Score</div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary btn-large" onclick="goToStep(2)">
+                            Continue to Questions →
+                        </button>
+                        <button class="btn btn-secondary" onclick="retakeMeasurement()">
+                            📸 Retake
+                        </button>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
-                      <h4 className="text-lg font-semibold text-white mb-4 uppercase tracking-wide">Features</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {rec.features.map((feature, i) => (
-                          <span key={i} className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-sm text-purple-200 font-medium">
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 2: Quiz -->
+        <div id="step2" class="step">
+            <div class="card">
+                <h2 class="question-title" id="questionTitle">What's your primary sleeping position?</h2>
+                
+                <div id="questionOptions">
+                    <div class="option" onclick="selectOption('side')">
+                        <div class="option-text">🤱 Side Sleeper</div>
+                        <div class="option-desc">Sleep on my side most nights</div>
+                    </div>
+                    <div class="option" onclick="selectOption('back')">
+                        <div class="option-text">😴 Back Sleeper</div>
+                        <div class="option-desc">Sleep on my back facing up</div>
+                    </div>
+                    <div class="option" onclick="selectOption('stomach')">
+                        <div class="option-text">🛌 Stomach Sleeper</div>
+                        <div class="option-desc">Sleep face down</div>
+                    </div>
+                    <div class="option" onclick="selectOption('mixed')">
+                        <div class="option-text">🔄 Combination</div>
+                        <div class="option-desc">Change positions during night</div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(6,182,212,0.1); border: 2px solid rgba(6,182,212,0.3); border-radius: 16px; padding: 1.5rem; margin: 2rem 0;">
+                    <h4 style="color: #06b6d4; margin-bottom: 1rem;">🤖 Need help? Try these AI suggestions:</h4>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <button class="chat-option" onclick="goToChatWithMessage('I\\'m not sure about my sleeping position')">
+                            💬 "I'm not sure about my sleeping position"
+                        </button>
+                        <button class="chat-option" onclick="goToChatWithMessage('What position is best for neck pain?')">
+                            💬 "What position is best for neck pain?"
+                        </button>
+                        <button class="chat-option" onclick="goToChatWithMessage('I change positions during the night')">
+                            💬 "I change positions during the night"
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+                    <div class="question-info">Question 1 of 4</div>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next →</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 3: Chat -->
+        <div id="step3" class="step">
+            <div class="card">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h2>🤖 AI Pillow Expert</h2>
+                        <p>Get personalized recommendations and answers</p>
                     </div>
                     
-                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
-                      <h4 className="text-lg font-semibold text-white mb-4 uppercase tracking-wide">Recommended Brands</h4>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {rec.brands.map((brand, i) => (
-                          <span key={i} className="px-3 py-1 bg-white/10 border border-white/20 rounded-lg text-sm text-white font-medium">
-                            {brand}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-gray-400 mb-1">Expected Price Range</div>
-                        <div className="text-2xl font-bold text-green-400">{rec.price}</div>
-                      </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-message">
+                            <div class="chat-avatar bot">🤖</div>
+                            <div class="chat-bubble bot">
+                                <p>Hi! I'm your AI pillow expert. What would you like to know about finding the perfect pillow?</p>
+                                <div class="chat-options">
+                                    <div class="chat-option" onclick="sendMessage('What sleeping position is best for me?')">
+                                        💬 What sleeping position is best for me?
+                                    </div>
+                                    <div class="chat-option" onclick="sendMessage('I have neck pain when I sleep')">
+                                        💬 I have neck pain when I sleep
+                                    </div>
+                                    <div class="chat-option" onclick="sendMessage('I sleep too hot at night')">
+                                        💬 I sleep too hot at night
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
+                    
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Ask about pillows, sleep positions, materials..." onkeypress="handleEnter(event)">
+                        <button class="btn btn-primary" onclick="sendMessage()" style="margin: 0;">Send</button>
+                    </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Call to Action */}
-          <div className="mt-16 text-center p-12 bg-gradient-to-r from-green-500/20 to-purple-500/20 backdrop-blur-xl rounded-3xl border-2 border-green-500/40 relative overflow-hidden">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-500 via-cyan-500 to-purple-500"></div>
-            
-            <h3 className="text-4xl font-bold text-white mb-6">🎉 Your Perfect Sleep Journey Starts Now!</h3>
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Scientifically personalized recommendations based on your unique measurements and sleep profile
-            </p>
-            
-            <div className="flex flex-col sm:flex-row justify-center gap-6 mb-8">
-              <button
-                onClick={() => setCurrentStep('browse')}
-                className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-purple-700 hover:to-cyan-700 transition-all transform hover:scale-105 shadow-xl"
-              >
-                🛍️ Browse Recommended Pillows
-              </button>
-              <button
-                onClick={() => setCurrentStep('chat')}
-                className="bg-white/10 text-white px-8 py-4 rounded-2xl font-bold border-2 border-white/20 hover:bg-white/20 transition-all"
-              >
-                💬 Chat with AI Expert
-              </button>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">← Back to Quiz</button>
+                    <button class="btn btn-primary" onclick="goToStep(4)">See Results →</button>
+                </div>
             </div>
-            
-            <div className="border-t border-white/20 pt-6">
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-white/10 text-white px-6 py-3 rounded-xl border border-white/20 hover:bg-white/20 transition-all"
-              >
-                🔄 Start New Assessment
-              </button>
-              <p className="text-xs text-gray-400 mt-3">
-                Your measurements are automatically saved for 7 days
-              </p>
+        </div>
+        
+        <!-- Step 4: Results -->
+        <div id="step4" class="step">
+            <div class="card">
+                <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">🎯 Your Perfect Pillow Matches</h2>
+                <p class="subtitle">AI-powered recommendations based on your profile</p>
+                
+                <div id="measurementSummary" style="display: none;" class="card" style="background: rgba(168,85,247,0.1); border: 2px solid rgba(168,85,247,0.3);">
+                    <h3 style="margin-bottom: 1rem;">📊 Your Measurements</h3>
+                    <div class="measurement-grid">
+                        <div class="measurement-card">
+                            <div class="measurement-value purple" id="summaryNeck">-</div>
+                            <div class="measurement-label">Neck Width</div>
+                        </div>
+                        <div class="measurement-card">
+                            <div class="measurement-value cyan" id="summaryShoulder">-</div>
+                            <div class="measurement-label">Shoulder Width</div>
+                        </div>
+                        <div class="measurement-card">
+                            <div class="measurement-value pink" id="summaryLength">-</div>
+                            <div class="measurement-label">Neck-Shoulder</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="recommendations"></div>
+                
+                <div class="card" style="text-align: center; background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(168,85,247,0.1)); border: 2px solid rgba(16,185,129,0.4);">
+                    <h3 style="font-size: 2rem; margin-bottom: 1rem;">🎉 Your Perfect Sleep Journey Starts Now!</h3>
+                    <p style="margin-bottom: 2rem; opacity: 0.9;">Scientifically personalized recommendations ready for you</p>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <button class="btn btn-primary btn-large" onclick="goToStep(3)">💬 Chat with AI Expert</button>
+                        <button class="btn btn-secondary" onclick="saveResults()">💾 Save Results</button>
+                    </div>
+                    
+                    <button class="btn btn-secondary" onclick="startOver()">🔄 Start New Assessment</button>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    );
-  };
-
-  const renderBrowseStep = () => (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-6">
-            🛍️ Browse Premium Pillows
-          </h2>
-          <p className="text-xl text-gray-300">Live pricing • Real-time stock • 50K+ products</p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-purple-500/30 mb-8">
-          <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search pillows, brands, or features..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
-              />
-            </div>
-            <button className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-cyan-700 transition-all">
-              <Search className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {pillows.map(pillow => (
-            <div key={pillow.id} className="bg-black/40 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/30 hover:border-purple-500/50 transition-all duration-300 transform hover:scale-105">
-              <div className="relative">
-                <img 
-                  src={pillow.image} 
-                  alt={pillow.name}
-                  className="w-full h-48 object-cover"
-                />
-                <button
-                  onClick={() => setFavorites(prev => 
-                    prev.includes(pillow.id) 
-                      ? prev.filter(id => id !== pillow.id)
-                      : [...prev, pillow.id]
-                  )}
-                  className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
-                    favorites.includes(pillow.id) 
-                      ? 'bg-red-500 text-white' 
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  <Heart className={`h-4 w-4 ${favorites.includes(pillow.id) ? 'fill-current' : ''}`} />
-                </button>
-                {pillow.originalPrice > pillow.price && (
-                  <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                    ${pillow.originalPrice - pillow.price} OFF
-                  </div>
-                )}
-                {!pillow.inStock && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      Out of Stock
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-bold text-white truncate">{pillow.name}</h3>
-                  <span className="text-sm text-cyan-400 font-medium">{pillow.brand}</span>
-                </div>
-                
-                <div className="flex items-center mb-3">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${i < Math.floor(pillow.rating) ? 'text-yellow-400 fill-current' : 'text-gray-500'}`}
-                      />
-                    ))}
-                  </div>
-                  <span className="ml-2 text-sm text-gray-400">
-                    {pillow.rating} ({pillow.reviewCount.toLocaleString()})
-                  </span>
-                </div>
-                
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2">{pillow.description}</p>
-                
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {pillow.features.slice(0, 3).map((feature, index) => (
-                    <span key={index} className="bg-purple-500/20 text-purple-200 px-2 py-1 rounded-full text-xs">
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    {pillow.originalPrice > pillow.price && (
-                      <span className="text-gray-400 line-through text-sm">${pillow.originalPrice}</span>
-                    )}
-                    <span className="text-2xl font-bold text-white">${pillow.price}</span>
-                  </div>
-                  <span className="text-green-400 text-sm font-medium">{pillow.shipping}</span>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <button
-                    disabled={!pillow.inStock}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 text-white py-2 px-4 rounded-lg hover:from-purple-700 hover:to-cyan-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    View Details
-                  </button>
-                  <button
-                    onClick={() => window.open(`https://amazon.com/dp/${pillow.id}`, '_blank')}
-                    disabled={!pillow.inStock}
-                    className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                  </button>
-                </div>
-                
-                <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
-                  <span className="flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" />
-                    {pillow.apiSource}
-                  </span>
-                  <span>Live pricing</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Navigation */}
-        <div className="flex justify-center gap-4 mt-12">
-          <button
-            onClick={() => setCurrentStep('results')}
-            className="bg-white/10 text-white px-6 py-3 rounded-xl border border-white/20 hover:bg-white/20 transition-all"
-          >
-            ← Back to Results
-          </button>
-          <button
-            onClick={() => setCurrentStep('chat')}
-            className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-cyan-700 transition-all"
-          >
-            💬 Ask AI Expert
-          </button>
-        </div>
-      </div>
     </div>
-  );
 
-  // Notification Component
-  const Notification = () => (
-    showNotification && (
-      <div className={`fixed top-6 right-6 p-4 rounded-xl font-semibold z-50 transform transition-all duration-300 ${
-        showNotification ? 'translate-x-0' : 'translate-x-full'
-      } ${
-        notificationType === 'success' ? 'bg-green-500/90 text-white' : 
-        notificationType === 'error' ? 'bg-red-500/90 text-white' : 
-        'bg-blue-500/90 text-white'
-      } backdrop-blur-sm border border-white/20`}>
-        {notificationMessage}
-      </div>
-    )
-  );
-
-  return (
-    <div className="min-h-screen">
-      {/* Render current step */}
-      {currentStep === 'measurement' && renderMeasurementStep()}
-      {currentStep === 'quiz' && renderQuizStep()}
-      {currentStep === 'chat' && renderChatStep()}
-      {currentStep === 'results' && renderResultsStep()}
-      {currentStep === 'browse' && renderBrowseStep()}
-
-      {/* Notification */}
-      <Notification />
-
-      {/* Footer - Only show on browse step */}
-      {currentStep === 'browse' && (
-        <footer className="bg-black/40 backdrop-blur-xl border-t border-white/10">
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="text-center text-gray-300">
-              <p className="mb-4 text-lg font-semibold">
-                <strong className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                  Dream Pillow Finder Pro
-                </strong> - Ultimate production-ready pillow recommendation platform
-              </p>
-              <div className="flex items-center justify-center space-x-8 text-sm mb-4">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  <span>Live API Integration</span>
+    <script>
+        // State
+        let currentStepNum = 1;
+        let measurements = null;
+        let currentQuestion = 0;
+        let answers = {};
+        let chatMessages = [];
+        
+        const questions = [
+            {
+                id: 'position',
+                title: "What's your primary sleeping position?",
+                options: [
+                    { id: 'side', text: '🤱 Side Sleeper', desc: 'Sleep on my side most nights' },
+                    { id: 'back', text: '😴 Back Sleeper', desc: 'Sleep on my back facing up' },
+                    { id: 'stomach', text: '🛌 Stomach Sleeper', desc: 'Sleep face down' },
+                    { id: 'mixed', text: '🔄 Combination', desc: 'Change positions during night' }
+                ]
+            },
+            {
+                id: 'firmness',
+                title: "What firmness do you prefer?",
+                options: [
+                    { id: 'soft', text: '☁️ Soft', desc: 'Like sleeping on a cloud' },
+                    { id: 'medium', text: '⚖️ Medium', desc: 'Balanced support and comfort' },
+                    { id: 'firm', text: '💪 Firm', desc: 'Strong support, minimal sink' }
+                ]
+            },
+            {
+                id: 'issues',
+                title: "Any sleep issues?",
+                options: [
+                    { id: 'neck', text: '😣 Neck Pain', desc: 'Regular neck discomfort' },
+                    { id: 'hot', text: '🥵 Sleep Hot', desc: 'Often feel too warm' },
+                    { id: 'snoring', text: '😪 Snoring', desc: 'Breathing issues at night' },
+                    { id: 'none', text: '✨ None', desc: 'No specific issues' }
+                ]
+            },
+            {
+                id: 'budget',
+                title: "What's your budget?",
+                options: [
+                    { id: 'low', text: '💵 Under $50', desc: 'Best value options' },
+                    { id: 'mid', text: '💰 $50-$100', desc: 'Quality balance' },
+                    { id: 'high', text: '💎 $100+', desc: 'Premium options' }
+                ]
+            }
+        ];
+        
+        // Utility functions
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+        
+        function updateProgress() {
+            const progress = document.getElementById('progress');
+            const percentage = (currentStepNum / 4) * 100;
+            progress.style.width = percentage + '%';
+        }
+        
+        function goToStep(stepNum) {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            // Show target step
+            document.getElementById('step' + stepNum).classList.add('active');
+            currentStepNum = stepNum;
+            updateProgress();
+        }
+        
+        // Measurement functions
+        function startMeasurement() {
+            showNotification('🔄 Simulating AI measurement...', 'success');
+            
+            setTimeout(() => {
+                const mockMeasurements = {
+                    neck: (12 + Math.random() * 6).toFixed(1),
+                    shoulders: (38 + Math.random() * 12).toFixed(1),
+                    length: (8 + Math.random() * 4).toFixed(1)
+                };
+                
+                measurements = mockMeasurements;
+                
+                document.getElementById('neckValue').textContent = measurements.neck;
+                document.getElementById('shoulderValue').textContent = measurements.shoulders;
+                document.getElementById('lengthValue').textContent = measurements.length;
+                
+                document.getElementById('measurementPrompt').style.display = 'none';
+                document.getElementById('measurementResults').style.display = 'block';
+                
+                showNotification('✅ Measurements captured successfully!');
+            }, 2000);
+        }
+        
+        function retakeMeasurement() {
+            measurements = null;
+            document.getElementById('measurementPrompt').style.display = 'block';
+            document.getElementById('measurementResults').style.display = 'none';
+        }
+        
+        // Quiz functions
+        function selectOption(value) {
+            const question = questions[currentQuestion];
+            answers[question.id] = value;
+            
+            // Update UI
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.option').classList.add('selected');
+            
+            // Enable next button
+            document.getElementById('nextBtn').disabled = false;
+            
+            // Auto advance after short delay
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    nextQuestion();
+                } else {
+                    goToStep(4);
+                }
+            }, 1000);
+        }
+        
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                goToStep(4);
+                generateResults();
+            }
+        }
+        
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionTitle').textContent = question.title;
+            
+            const optionsHTML = question.options.map(opt => `
+                <div class="option" onclick="selectOption('${opt.id}')">
+                    <div class="option-text">${opt.text}</div>
+                    <div class="option-desc">${opt.desc}</div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  <span>Real Customer Reviews</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  <span>AI-Powered Recommendations</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  <span>25+ Brand Partners</span>
-                </div>
-              </div>
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>Integrates with: Amazon Product Advertising API, Trustpilot Reviews API, Shopify API, Claude AI API</p>
-                <p>Real-time data from Purple, Tempur-Pedic, Casper, Pluto, and 20+ other pillow brands</p>
-                <p>Enhanced UI/UX with camera measurements, voice input, and intelligent chat recommendations</p>
-              </div>
-            </div>
-          </div>
-        </footer>
-      )}
-    </div>
-  );
-};
-
+            `).join('');
+            
+            document.getElementById('questionOptions').innerHTML = optionsHTML;
+            document.querySelector('.question-info').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('nextBtn').disabled = true;
+        }
+        
+        // Chat functions
+        function goToChatWithMessage(message) {
+            goToStep(3);
+            setTimeout(() => sendMessage(message), 500);
+        }
+        
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function sendMessage(message) {
+            const input = document.getElementById('chatInput');
+            const text = message || input.value.trim();
+            if (!text) return;
+            
+            // Add user message
+            addChatMessage('user', text);
+            input.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const response = generateAIResponse(text);
+                addChatMessage('bot', response.text, response.options);
+            }, 1000);
+        }
+        
+        function addChatMessage(type, text, options = []) {
+            const messagesEl = document.getElementById('chatMessages');
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = `chat-message ${type}`;
+            
+            messageEl.innerHTML = `
+                <div class="chat-avatar ${type}">${type === 'user' ? '👤' :
